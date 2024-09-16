@@ -1,7 +1,7 @@
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
-declare const JwtAuthGuard_base: import("@nestjs/passport").Type<import("@nestjs/passport").IAuthGuard>;
+declare const JwtAuthGuard_base: any;
 export declare class JwtAuthGuard extends JwtAuthGuard_base {
     private reflector;
     constructor(reflector: Reflector);
