@@ -9,8 +9,8 @@ export declare class UserController {
     getAllUsers(): Promise<SafeTransferUserDto[]>;
     getOwnDetials(req: userEmbeddedRequest): Promise<SafeTransferUserDto>;
     getUser(username: string): Promise<User>;
-    deleteOwnDetails(req: userEmbeddedRequest): Promise<UpdateResult>;
-    deleteUser(username: string): Promise<UpdateResult>;
+    deleteOwnDetails(req: userEmbeddedRequest): Promise<import("typeorm").UpdateResult>;
+    deleteUser(username: string): Promise<import("typeorm").UpdateResult>;
     updateUser(username: string, updateUserDto: UpdateUserDto): Promise<User>;
     deactivateUser(username: string): Promise<User>;
     deactivateSelf(req: userEmbeddedRequest): Promise<User>;
