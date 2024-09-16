@@ -5,7 +5,7 @@ import { UserService } from '../user/user.service';
 import { UserRepository } from '../user/repository/user.repository';
 import { JwtPayload } from '../utils/types';
 import { LoginUserDto } from '../user/dto/user.dto';
-import { authFailure, errorMessages } from '../utils/constants/errors.constant';
+import { authFailure, errorMessages, userFailure } from '../utils/constants/errors.constant';
 import { User } from '../user/entity/user.entity';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class AuthService {
   ) {}
 
   // Validate user credentials
-  async validateUser(username: string, password: string): Promise<User|null> {
+  async validateUser(username: string, password: string): Promise<User> {
     let user: User;
     try{
       user = await this.userRepository.findUser(username);
@@ -28,15 +28,18 @@ export class AuthService {
 
     try{
       const isMatching: boolean = await bcrypt.compare(password, user.pass);
-      if(isMatching) {
-        return user;
+      console.log(isMatching)
+      if(!isMatching) {
+        throw new UnauthorizedException(userFailure.INVALID_CREDENTIALS)
       }
     }
     catch(error){
+      if(error instanceof UnauthorizedException) 
+        throw error;
       throw new InternalServerErrorException(errorMessages.ENCRYPTION_FAILURE);
     }
 
-    return null;
+    return user;
   }
 
   // Generate JWT token for authenticated user
@@ -44,7 +47,7 @@ export class AuthService {
 
     let user: User;
     try{
-      user = await this.authenticateUser(loginData.username, loginData.pass)
+      user = await this.authenticateUser(loginData.username, loginData.pass);
     }
     catch(error){
       throw error;
@@ -69,13 +72,15 @@ export class AuthService {
     }
 
     try{
-      const isMatching = bcrypt.compare(password, user.pass);
+      const isMatching: boolean = await bcrypt.compare(password, user.pass);
 
       if(!isMatching){
         throw new UnauthorizedException(authFailure.INVALID_CREDENTIALS);
       }
     }
     catch(error){
+      if(error instanceof UnauthorizedException)
+        throw error;
       throw new InternalServerErrorException(errorMessages.ENCRYPTION_FAILURE);
     }
 

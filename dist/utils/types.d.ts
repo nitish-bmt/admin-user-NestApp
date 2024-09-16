@@ -1,4 +1,3 @@
-import { SafeTransferUserDto } from "../user/dto/user.dto";
 export interface JwtPayload {
     userId: string;
     username: string;
@@ -11,5 +10,5 @@ export interface StandardResponse {
     status: number;
     message: string;
     success: boolean;
-    response?: SafeTransferUserDto[] | SafeTransferUserDto;
+    response?: any;
 }

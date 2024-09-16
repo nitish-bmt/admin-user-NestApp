@@ -32,14 +32,17 @@ let AuthService = class AuthService {
         }
         try {
             const isMatching = await bcrypt.compare(password, user.pass);
-            if (isMatching) {
-                return user;
+            console.log(isMatching);
+            if (!isMatching) {
+                throw new common_1.UnauthorizedException(errors_constant_1.userFailure.INVALID_CREDENTIALS);
             }
         }
         catch (error) {
+            if (error instanceof common_1.UnauthorizedException)
+                throw error;
             throw new common_1.InternalServerErrorException(errors_constant_1.errorMessages.ENCRYPTION_FAILURE);
         }
-        return null;
+        return user;
     }
     async login(loginData) {
         let user;
@@ -64,12 +67,14 @@ let AuthService = class AuthService {
             throw error;
         }
         try {
-            const isMatching = bcrypt.compare(password, user.pass);
+            const isMatching = await bcrypt.compare(password, user.pass);
             if (!isMatching) {
                 throw new common_1.UnauthorizedException(errors_constant_1.authFailure.INVALID_CREDENTIALS);
             }
         }
         catch (error) {
+            if (error instanceof common_1.UnauthorizedException)
+                throw error;
             throw new common_1.InternalServerErrorException(errors_constant_1.errorMessages.ENCRYPTION_FAILURE);
         }
         return user;

@@ -18,6 +18,7 @@ const auth_service_1 = require("./auth.service");
 const custom_decorator_1 = require("../utils/customDecorator/custom.decorator");
 const user_dto_1 = require("../user/dto/user.dto");
 const utilityFunction_1 = require("../utils/utilityFunction");
+const success_constant_1 = require("../utils/constants/success.constant");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -25,7 +26,7 @@ let AuthController = class AuthController {
     async login(loginCredentials) {
         try {
             const token = await this.authService.login(loginCredentials);
-            return token;
+            return (0, utilityFunction_1.standardizeResponse)(common_1.HttpStatus.ACCEPTED, success_constant_1.userSuccess.LOGGED_IN, token);
         }
         catch (error) {
             return (0, utilityFunction_1.standardizeErrorResponse)(error);

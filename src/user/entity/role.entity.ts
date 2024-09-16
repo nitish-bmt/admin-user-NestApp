@@ -5,7 +5,6 @@ import { User } from "./user.entity";
 export class Role{
 
   @PrimaryGeneratedColumn()
-  // @PrimaryColumn({type: 'number'})
   @OneToMany(()=>User, user=>user.id)
   @JoinColumn()
   id: number;

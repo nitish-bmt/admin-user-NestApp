@@ -27,6 +27,7 @@ export declare enum userCreationFailure {
     USERNAME_ALREADY_TAKEN = "Username already taken. Try with another username."
 }
 export declare enum userFailure {
+    INVALID_CREDENTIALS = "Credentials do not match",
     USER_NOT_FOUND = "User does not exist",
     USER_NOT_DELETED = "COULD NOT DELETE THE USER",
     ADMIN_PRIVACY = "ADMIN CAN ONLY GET SUB ADMINS"

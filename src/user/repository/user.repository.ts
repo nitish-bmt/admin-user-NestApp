@@ -23,7 +23,7 @@ export class UserRepository extends Repository<User> {
     );
   }
 
-  // Method to find a user by username or email, returning null if not found
+  // Method to find a user by username or email
   async findUser(username?: string, email?: string): Promise<User> {
     const whereClause: Partial<User> = {}; // Define empty search condition object
 

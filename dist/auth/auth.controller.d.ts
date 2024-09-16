@@ -3,5 +3,5 @@ import { LoginUserDto } from 'src/user/dto/user.dto';
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
-    login(loginCredentials: LoginUserDto): Promise<string | import("../utils/types").StandardResponse>;
+    login(loginCredentials: LoginUserDto): Promise<import("../utils/types").StandardResponse>;
 }

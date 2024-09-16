@@ -3,18 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.standardizeResponse = standardizeResponse;
 exports.standardizeErrorResponse = standardizeErrorResponse;
 function standardizeResponse(statusCode, message, response) {
-    let resp;
-    resp.status = statusCode;
-    resp.success = true;
-    resp.message = message;
-    if (response)
-        resp.response = response;
-    return resp;
+    return {
+        status: statusCode,
+        success: true,
+        response: response,
+        message: message,
+    };
 }
 function standardizeErrorResponse(error) {
-    let resp;
-    resp.success = false;
-    resp.message = error.message;
-    return resp;
+    return {
+        success: false,
+        message: error.message,
+    };
 }
 //# sourceMappingURL=utilityFunction.js.map

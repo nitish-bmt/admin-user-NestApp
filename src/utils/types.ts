@@ -14,5 +14,5 @@ export interface StandardResponse{
   status: number;
   message: string;
   success: boolean;
-  response?: SafeTransferUserDto[]|SafeTransferUserDto;
+  response?: any;
 }

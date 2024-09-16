@@ -24,6 +24,7 @@ var userCreationFailure;
 })(userCreationFailure || (exports.userCreationFailure = userCreationFailure = {}));
 var userFailure;
 (function (userFailure) {
+    userFailure["INVALID_CREDENTIALS"] = "Credentials do not match";
     userFailure["USER_NOT_FOUND"] = "User does not exist";
     userFailure["USER_NOT_DELETED"] = "COULD NOT DELETE THE USER";
     userFailure["ADMIN_PRIVACY"] = "ADMIN CAN ONLY GET SUB ADMINS";
