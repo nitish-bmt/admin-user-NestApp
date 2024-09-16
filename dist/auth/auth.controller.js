@@ -17,13 +17,19 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const custom_decorator_1 = require("../utils/customDecorator/custom.decorator");
 const user_dto_1 = require("../user/dto/user.dto");
+const utilityFunction_1 = require("../utils/utilityFunction");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
     async login(loginCredentials) {
-        console.log("hi from lohin");
-        return this.authService.login(loginCredentials);
+        try {
+            const token = await this.authService.login(loginCredentials);
+            return token;
+        }
+        catch (error) {
+            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
     }
 };
 exports.AuthController = AuthController;

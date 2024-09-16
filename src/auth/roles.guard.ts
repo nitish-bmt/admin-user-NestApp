@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { validRoleId, validRoleType } from '../user/entity/role.entity';
 import { ROLES_KEY } from '../utils/customDecorator/custom.decorator';
 
-export const Roles = (...roles: validRoleId[]) => SetMetadata(ROLES_KEY, roles);
+// export const Roles = (...roles: validRoleId[]) => SetMetadata(ROLES_KEY, roles);
 
 @Injectable()
 export class RolesGuard implements CanActivate {

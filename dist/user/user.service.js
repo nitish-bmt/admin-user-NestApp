@@ -51,7 +51,7 @@ let UserService = class UserService {
             throw error;
         }
         if (user.roleId == role_entity_1.validRoleId.admin) {
-            return null;
+            throw new common_1.UnauthorizedException(errors_constant_1.userFailure.ADMIN_PRIVACY);
         }
         return user;
     }
@@ -99,10 +99,6 @@ let UserService = class UserService {
             console.log(error);
         }
         return deletionResult;
-    }
-    async deactivateUser() {
-    }
-    async activateUser() {
     }
 };
 exports.UserService = UserService;

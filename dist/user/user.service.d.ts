@@ -14,6 +14,4 @@ export declare class UserService {
     addNewUser(newUserData: CreateUserDto): Promise<User>;
     updateUser(username: string, dataToUpdate: UpdateUserDto): Promise<User>;
     deleteUser(username: string): Promise<UpdateResult>;
-    deactivateUser(): Promise<void>;
-    activateUser(): Promise<void>;
 }

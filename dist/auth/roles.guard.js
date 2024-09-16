@@ -9,12 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RolesGuard = exports.Roles = void 0;
+exports.RolesGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const custom_decorator_1 = require("../utils/customDecorator/custom.decorator");
-const Roles = (...roles) => (0, common_1.SetMetadata)(custom_decorator_1.ROLES_KEY, roles);
-exports.Roles = Roles;
 let RolesGuard = class RolesGuard {
     constructor(reflector) {
         this.reflector = reflector;

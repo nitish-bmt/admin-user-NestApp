@@ -1,18 +1,17 @@
-import { CreateUserDto, SafeTransferUserDto, UpdateUserDto } from './dto/user.dto';
+import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { UserService } from './user.service';
-import { userEmbeddedRequest } from '../utils/types';
-import { User } from './entity/user.entity';
+import { StandardResponse, userEmbeddedRequest } from '../utils/types';
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
-    addNewUser(createUserDto: CreateUserDto): Promise<User>;
-    getAllUsers(): Promise<SafeTransferUserDto[]>;
-    getOwnDetials(req: userEmbeddedRequest): Promise<SafeTransferUserDto>;
-    getUser(username: string): Promise<User>;
-    deleteOwnDetails(req: userEmbeddedRequest): Promise<import("typeorm").UpdateResult>;
-    deleteUser(username: string): Promise<import("typeorm").UpdateResult>;
-    updateUser(username: string, updateUserDto: UpdateUserDto): Promise<User>;
-    deactivateUser(username: string): Promise<User>;
-    deactivateSelf(req: userEmbeddedRequest): Promise<User>;
-    activateUser(username: string): Promise<User>;
+    addNewUser(createUserDto: CreateUserDto): Promise<StandardResponse>;
+    getAllUsers(): Promise<StandardResponse>;
+    getOwnDetials(req: userEmbeddedRequest): Promise<StandardResponse>;
+    getUser(username: string): Promise<StandardResponse>;
+    deactivateSelf(req: userEmbeddedRequest): Promise<StandardResponse>;
+    deactivateUser(username: string): Promise<StandardResponse>;
+    activateUser(username: string): Promise<StandardResponse>;
+    deleteOwnDetails(req: userEmbeddedRequest): Promise<StandardResponse>;
+    deleteUser(username: string): Promise<StandardResponse>;
+    updateUser(username: string, updateUserDto: UpdateUserDto): Promise<StandardResponse>;
 }

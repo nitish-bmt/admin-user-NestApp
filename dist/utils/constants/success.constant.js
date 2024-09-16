@@ -12,8 +12,14 @@ var dbSuccess;
 var userSuccess;
 (function (userSuccess) {
     userSuccess["USER_CREATED"] = "New user created successfully.";
+    userSuccess["LOGGED_IN"] = "Logged in successfully";
+    userSuccess["USER_UPDATED"] = "User updated successfully.";
     userSuccess["USER_FOUND"] = "User exists";
     userSuccess["USER_DELETED"] = "DELETED THE USER";
+    userSuccess["FETCHED_USER"] = "Got the user";
+    userSuccess["FETCHED_USER_LIST"] = "Got the user list";
+    userSuccess["ACTIVATED"] = "Activated the user successfully";
+    userSuccess["DEACTIVATED"] = "Deactivated the user successfully";
 })(userSuccess || (exports.userSuccess = userSuccess = {}));
 var successStatus;
 (function (successStatus) {

@@ -49,6 +49,9 @@ let AuthService = class AuthService {
         catch (error) {
             throw error;
         }
+        if (!user.isActive) {
+            throw new common_1.UnauthorizedException(errors_constant_1.authFailure.INACTIVE_USER);
+        }
         const payload = { username: user.username, userId: user.id, roleId: user.roleId };
         return this.jwtService.sign(payload);
     }

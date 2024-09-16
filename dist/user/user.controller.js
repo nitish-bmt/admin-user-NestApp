@@ -19,43 +19,117 @@ const roles_guard_1 = require("../auth/roles.guard");
 const custom_decorator_1 = require("../utils/customDecorator/custom.decorator");
 const user_dto_1 = require("./dto/user.dto");
 const user_service_1 = require("./user.service");
+const utilityFunction_1 = require("../utils/utilityFunction");
+const success_constant_1 = require("../utils/constants/success.constant");
+const statusCodes_constant_1 = require("../utils/constants/statusCodes.constant");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
     }
     async addNewUser(createUserDto) {
-        return await this.userService.addNewUser(createUserDto);
+        let response;
+        try {
+            response = await this.userService.addNewUser(createUserDto);
+        }
+        catch (error) {
+            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(common_1.HttpStatus.CREATED, success_constant_1.userSuccess.USER_CREATED, response);
     }
     async getAllUsers() {
-        const users = await this.userService.getAllSubAdmins();
-        const result = users.map(user => this.userService.userEntityToShareableDto(user));
-        return result;
+        let users;
+        let result;
+        try {
+            users = await this.userService.getAllSubAdmins();
+            result = users.map(user => this.userService.userEntityToShareableDto(user));
+        }
+        catch (error) {
+            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(common_1.HttpStatus.OK, success_constant_1.userSuccess.FETCHED_USER_LIST, result);
     }
     async getOwnDetials(req) {
-        const res = (await this.userService.getUser(req.user.username));
-        return this.userService.userEntityToShareableDto(res);
+        let user;
+        let result;
+        try {
+            user = (await this.userService.getUser(req.user.username));
+            result = this.userService.userEntityToShareableDto(user);
+        }
+        catch (error) {
+            (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(common_1.HttpStatus.OK, success_constant_1.userSuccess.FETCHED_USER, result);
     }
     async getUser(username) {
-        const res = await this.userService.getUserIfSubAdmin(username);
-        return res;
-    }
-    deleteOwnDetails(req) {
-        return this.userService.deleteUser(req.user.userId);
-    }
-    deleteUser(username) {
-        return this.userService.deleteUser(username);
-    }
-    async updateUser(username, updateUserDto) {
-        return await this.userService.updateUser(username, updateUserDto);
-    }
-    async deactivateUser(username) {
-        return await this.userService.updateUser(username, { isActive: false });
+        let user;
+        try {
+            user = await this.userService.getUserIfSubAdmin(username);
+        }
+        catch (error) {
+            (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        const result = this.userService.userEntityToShareableDto(user);
+        return (0, utilityFunction_1.standardizeResponse)(common_1.HttpStatus.OK, success_constant_1.userSuccess.FETCHED_USER, result);
     }
     async deactivateSelf(req) {
-        return await this.userService.updateUser(req.user.username, { isActive: false });
+        let deactivatedUser;
+        try {
+            deactivatedUser = await this.userService.updateUser(req.user.username, { isActive: false });
+        }
+        catch (error) {
+            (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(statusCodes_constant_1.StatusCodes.UPDATED, success_constant_1.userSuccess.DEACTIVATED, deactivatedUser);
+    }
+    async deactivateUser(username) {
+        let deactivatedUser;
+        try {
+            deactivatedUser = await this.userService.updateUser(username, { isActive: false });
+        }
+        catch (error) {
+            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(statusCodes_constant_1.StatusCodes.UPDATED, success_constant_1.userSuccess.DEACTIVATED, deactivatedUser);
     }
     async activateUser(username) {
-        return await this.userService.updateUser(username, { isActive: false });
+        let activatedUser;
+        try {
+            activatedUser = await this.userService.updateUser(username, { isActive: true });
+        }
+        catch (error) {
+            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(statusCodes_constant_1.StatusCodes.UPDATED, success_constant_1.userSuccess.ACTIVATED, activatedUser);
+    }
+    async deleteOwnDetails(req) {
+        let isUserDeleted;
+        try {
+            isUserDeleted = await this.userService.deleteUser(req.user.userId);
+        }
+        catch (error) {
+            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(statusCodes_constant_1.StatusCodes.UPDATED, success_constant_1.userSuccess.ACTIVATED, isUserDeleted);
+    }
+    async deleteUser(username) {
+        let isUserDeleted;
+        try {
+            isUserDeleted = await this.userService.deleteUser(username);
+        }
+        catch (error) {
+            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(statusCodes_constant_1.StatusCodes.UPDATED, success_constant_1.userSuccess.USER_DELETED, isUserDeleted);
+    }
+    async updateUser(username, updateUserDto) {
+        let updatedUser;
+        try {
+            updatedUser = await this.userService.updateUser(username, updateUserDto);
+        }
+        catch (error) {
+            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+        }
+        return (0, utilityFunction_1.standardizeResponse)(statusCodes_constant_1.StatusCodes.UPDATED, success_constant_1.userSuccess.USER_UPDATED, updatedUser);
     }
 };
 exports.UserController = UserController;
@@ -92,12 +166,36 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUser", null);
 __decorate([
+    (0, common_1.Patch)("deactivate"),
+    (0, custom_decorator_1.UserAndAdmin)(),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deactivateSelf", null);
+__decorate([
+    (0, common_1.Patch)("deactivate/:username"),
+    (0, custom_decorator_1.AdminOnly)(),
+    __param(0, (0, common_1.Param)('username')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "deactivateUser", null);
+__decorate([
+    (0, common_1.Patch)("activate/:username"),
+    (0, custom_decorator_1.AdminOnly)(),
+    __param(0, (0, common_1.Param)('username')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "activateUser", null);
+__decorate([
     (0, common_1.Delete)("delete"),
     (0, custom_decorator_1.UserAndAdmin)(),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UserController.prototype, "deleteOwnDetails", null);
 __decorate([
     (0, common_1.Delete)('delete/:username'),
@@ -105,7 +203,7 @@ __decorate([
     __param(0, (0, common_1.Param)('username')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UserController.prototype, "deleteUser", null);
 __decorate([
     (0, common_1.Patch)(':username'),
@@ -116,30 +214,6 @@ __decorate([
     __metadata("design:paramtypes", [String, user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateUser", null);
-__decorate([
-    (0, common_1.Patch)(":username"),
-    (0, custom_decorator_1.AdminOnly)(),
-    __param(0, (0, common_1.Param)('username')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "deactivateUser", null);
-__decorate([
-    (0, common_1.Patch)(),
-    (0, custom_decorator_1.UserAndAdmin)(),
-    __param(0, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "deactivateSelf", null);
-__decorate([
-    (0, common_1.Patch)(":username"),
-    (0, custom_decorator_1.AdminOnly)(),
-    __param(0, (0, common_1.Param)('username')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "activateUser", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('users'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

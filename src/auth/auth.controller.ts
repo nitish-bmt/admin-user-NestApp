@@ -2,6 +2,7 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from '../utils/customDecorator/custom.decorator';
 import { LoginUserDto } from 'src/user/dto/user.dto';
+import { standardizeErrorResponse } from '../utils/utilityFunction';
 
 @Controller('auth')
 export class AuthController {
@@ -11,8 +12,13 @@ export class AuthController {
   @Public()
   @Post('login')
   async login(@Body() loginCredentials: LoginUserDto) {
-    console.log("hi from lohin")
-    return this.authService.login(loginCredentials);
+    try{
+      const token: string = await this.authService.login(loginCredentials);
+      return token;
+    }
+    catch(error){
+      return standardizeErrorResponse(error);
+    }
   }
 }
 

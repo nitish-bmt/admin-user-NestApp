@@ -26,10 +26,12 @@ var userFailure;
 (function (userFailure) {
     userFailure["USER_NOT_FOUND"] = "User does not exist";
     userFailure["USER_NOT_DELETED"] = "COULD NOT DELETE THE USER";
+    userFailure["ADMIN_PRIVACY"] = "ADMIN CAN ONLY GET SUB ADMINS";
 })(userFailure || (exports.userFailure = userFailure = {}));
 var authFailure;
 (function (authFailure) {
     authFailure["FAILURE"] = "Could not login";
+    authFailure["INACTIVE_USER"] = "Inactive users are not allowed";
     authFailure["INVALID_CREDENTIALS"] = "username and password do not match";
 })(authFailure || (exports.authFailure = authFailure = {}));
 //# sourceMappingURL=errors.constant.js.map

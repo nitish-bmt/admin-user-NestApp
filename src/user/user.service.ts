@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException} from "@nestjs/common";
+import { HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException} from "@nestjs/common";
 import { UserRepository } from "./repository/user.repository";
 import * as bcrypt from "bcrypt";
 import { CreateUserDto, SafeTransferUserDto, UpdateUserDto } from "./dto/user.dto";
@@ -6,7 +6,7 @@ import { validRoleId } from "./entity/role.entity";
 import { User } from "./entity/user.entity";
 import { plainToClass } from "class-transformer";
 import { RoleRepository } from "./repository/role.repository";
-import { dbFailure, errorMessages } from "../utils/constants/errors.constant";
+import { dbFailure, errorMessages, userFailure } from "../utils/constants/errors.constant";
 import { UpdateResult } from "typeorm";
 
 @Injectable()
@@ -49,7 +49,7 @@ export class UserService {
     }
 
     if(user.roleId == validRoleId.admin){
-      return null;
+      throw new UnauthorizedException(userFailure.ADMIN_PRIVACY)
     }
 
     return user;
@@ -110,13 +110,5 @@ export class UserService {
     }
 
     return deletionResult;
-  }
-
-  async deactivateUser(){
-
-  }
-
-  async activateUser(){
-    
   }
 }

@@ -28,9 +28,11 @@ export declare enum userCreationFailure {
 }
 export declare enum userFailure {
     USER_NOT_FOUND = "User does not exist",
-    USER_NOT_DELETED = "COULD NOT DELETE THE USER"
+    USER_NOT_DELETED = "COULD NOT DELETE THE USER",
+    ADMIN_PRIVACY = "ADMIN CAN ONLY GET SUB ADMINS"
 }
 export declare enum authFailure {
     FAILURE = "Could not login",
+    INACTIVE_USER = "Inactive users are not allowed",
     INVALID_CREDENTIALS = "username and password do not match"
 }

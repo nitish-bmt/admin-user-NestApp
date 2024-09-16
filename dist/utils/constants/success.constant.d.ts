@@ -7,8 +7,14 @@ export declare enum dbSuccess {
 }
 export declare enum userSuccess {
     USER_CREATED = "New user created successfully.",
+    LOGGED_IN = "Logged in successfully",
+    USER_UPDATED = "User updated successfully.",
     USER_FOUND = "User exists",
-    USER_DELETED = "DELETED THE USER"
+    USER_DELETED = "DELETED THE USER",
+    FETCHED_USER = "Got the user",
+    FETCHED_USER_LIST = "Got the user list",
+    ACTIVATED = "Activated the user successfully",
+    DEACTIVATED = "Deactivated the user successfully"
 }
 export declare enum successStatus {
     OK = 200,

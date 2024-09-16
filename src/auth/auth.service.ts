@@ -50,6 +50,10 @@ export class AuthService {
       throw error;
     }
 
+    if(!user.isActive){
+      throw new UnauthorizedException(authFailure.INACTIVE_USER)
+    }
+
     const payload: JwtPayload = { username: user.username, userId: user.id, roleId: user.roleId };
     return this.jwtService.sign(payload);
   }

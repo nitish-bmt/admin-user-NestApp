@@ -1,25 +1,23 @@
 import { HttpCode, HttpException, HttpStatus } from "@nestjs/common";
 import { errorMessages } from "./constants/errors.constant";
 import { StandardResponse } from "./types";
+import { response } from "express";
 
-function standardizeResponse(statusCode: number, responseData?: any ): StandardResponse{
-
+export function standardizeResponse(statusCode: number,  message: string, response?: any): StandardResponse{
   let resp: StandardResponse;
   resp.status = statusCode;
-  if(responseData) resp.response = responseData;
+  resp.success = true;
+  resp.message = message;
+  if(response) resp.response = response;
+  return resp;
+}
 
-  switch(statusCode){
-  
-    case 200: // OK
-    case 201: // CREATED
-    case 202: // ACCEPTED
-    case 302: // FOUND
-              resp.success = true;
-              break;
-    default:  resp.success = false;
-  }
+export function standardizeErrorResponse(error: Error ): StandardResponse{
 
-  resp.message = HttpStatus[statusCode];
-  
+  let resp: StandardResponse;
+  // resp.status = error.;
+
+  resp.success = false;  
+  resp.message = error.message;
   return resp;
 }
