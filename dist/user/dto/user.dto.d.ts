@@ -17,7 +17,7 @@ export declare class SafeTransferUserDto extends CreateUserDto {
     roleId: validRoleId;
     role: string;
 }
-declare const UpdateUserDto_base: import("@nestjs/common").Type<Partial<SafeTransferUserDto>>;
+declare const UpdateUserDto_base: any;
 export declare class UpdateUserDto extends UpdateUserDto_base {
 }
 export declare class LoginUserDto {

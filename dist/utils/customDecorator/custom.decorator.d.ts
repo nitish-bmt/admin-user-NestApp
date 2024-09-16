@@ -1,6 +1,6 @@
 export declare const PUBLIC_KEY = "isPublic";
-export declare const Public: () => import("@nestjs/common").CustomDecorator<string>;
+export declare const Public: () => any;
 export declare const ROLES_KEY = "roles";
-export declare const UserAndAdmin: () => import("@nestjs/common").CustomDecorator<string>;
-export declare const AdminOnly: () => import("@nestjs/common").CustomDecorator<string>;
-export declare const Roles: (...roles: string[]) => import("@nestjs/common").CustomDecorator<string>;
+export declare const UserAndAdmin: () => any;
+export declare const AdminOnly: () => any;
+export declare const Roles: (...roles: string[]) => any;
