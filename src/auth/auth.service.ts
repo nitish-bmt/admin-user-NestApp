@@ -8,82 +8,81 @@ import { LoginUserDto } from '../user/dto/user.dto';
 import { authFailure, errorMessages, userFailure } from '../utils/constants/errors.constant';
 import { User } from '../user/entity/user.entity';
 
+// Authentication service responsible for handling user login and authentication.
 @Injectable()
 export class AuthService {
+  // Constructor to inject dependencies.
+  // @param userService User service instance.
+  // @param userRepository User repository instance.
+  // @param jwtService JWT service instance.
   constructor(
     private userService: UserService,
     private userRepository: UserRepository,
     private jwtService: JwtService,
   ) {}
 
-  // Validate user credentials
-  async validateUser(username: string, password: string): Promise<User> {
+  // Generate a JWT token for an authenticated user.
+  // @param loginData Login data containing username and password.
+  // @returns A JWT token string.
+  async login(loginData: LoginUserDto): Promise<string> {
     let user: User;
-    try{
-      user = await this.userRepository.findUser(username);
-    }
-    catch(error){
-      throw error;
-    }
 
-    try{
-      const isMatching: boolean = await bcrypt.compare(password, user.pass);
-      console.log(isMatching)
-      if(!isMatching) {
-        throw new UnauthorizedException(userFailure.INVALID_CREDENTIALS)
-      }
-    }
-    catch(error){
-      if(error instanceof UnauthorizedException) 
-        throw error;
-      throw new InternalServerErrorException(errorMessages.ENCRYPTION_FAILURE);
-    }
-
-    return user;
-  }
-
-  // Generate JWT token for authenticated user
-  async login(loginData: LoginUserDto): Promise<string>{
-
-    let user: User;
-    try{
+    // Attempt to authenticate the user using the provided login data.
+    try {
       user = await this.authenticateUser(loginData.username, loginData.pass);
-    }
-    catch(error){
+    } catch (error) {
+      // If authentication fails, re-throw the error.
       throw error;
     }
 
-    if(!user.isActive){
-      throw new UnauthorizedException(authFailure.INACTIVE_USER)
+    // Check if the authenticated user is active.
+    if (!user.isActive) {
+      // If the user is not active, throw an unauthorized exception.
+      throw new UnauthorizedException(authFailure.INACTIVE_USER);
     }
 
+    // Create a JWT payload containing the user's details.
     const payload: JwtPayload = { username: user.username, userId: user.id, roleId: user.roleId };
+
+    // Generate and return a JWT token.
     return this.jwtService.sign(payload);
   }
 
-  async authenticateUser(username: string, password: string): Promise<User>{
+  // Authenticate a user using their username and password.
+  // @param username Username to authenticate.
+  // @param password Password to authenticate.
+  // @returns The authenticated user instance.
+  async authenticateUser(username: string, password: string): Promise<User> {
     let user: User;
 
-    try{
+    // Attempt to find the user by their username.
+    try {
       user = await this.userRepository.findUser(username);
-    }
-    catch(error){
+    } catch (error) {
+      // If the user is not found, re-throw the error.
       throw error;
     }
 
-    try{
+    // Attempt to compare the provided password with the stored password.
+    try {
       const isMatching: boolean = await bcrypt.compare(password, user.pass);
 
-      if(!isMatching){
+      // If the passwords do not match, throw an unauthorized exception.
+      if (!isMatching) {
         throw new UnauthorizedException(authFailure.INVALID_CREDENTIALS);
       }
-    }
-    catch(error){
-      if(error instanceof UnauthorizedException)
+    } catch (error) {
+      // If an error occurs during password comparison, check if it's an unauthorized exception.
+      if (error instanceof UnauthorizedException) {
+        // If it's an unauthorized exception, re-throw it.
         throw error;
-      throw new InternalServerErrorException(errorMessages.ENCRYPTION_FAILURE);
+      } else {
+        // If it's not an unauthorized exception, throw an internal server error.
+        throw new InternalServerErrorException(errorMessages.ENCRYPTION_FAILURE);
+      }
     }
 
+    // If authentication is successful, return the user instance.
     return user;
   }
 }

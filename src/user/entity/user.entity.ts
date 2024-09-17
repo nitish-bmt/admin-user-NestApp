@@ -16,7 +16,7 @@ export class User{
   })
   isActive: boolean;
 
-  @ManyToOne(()=>Role, role => role.id)
+  @ManyToOne(() => Role, role => role.id)
   @JoinColumn({ name: 'roleId', })
   @Column({
     nullable: false,

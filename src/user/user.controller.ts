@@ -11,15 +11,17 @@ import { userSuccess } from '../utils/constants/success.constant';
 import { StatusCodes } from '../utils/constants/statusCodes.constant';
 import { UpdateResult } from 'typeorm';
 
+// Controller for handling user-related operations
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)  // Apply JWT authentication and role-based access control to all routes
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // Create a new user (Admin only)
+  // Create a new user (Public access)
   @Post("register")
   @Public()
   async addNewUser(@Body() createUserDto: CreateUserDto) {
+    // Attempt to create a new user and handle potential errors
     let response: User;
     try{
       response = await this.userService.addNewUser(createUserDto);
@@ -35,7 +37,7 @@ export class UserController {
   @AdminOnly()
   @UseGuards(RolesGuard)
   async getAllUsers() {
-
+    // Retrieve all sub-admin users and convert to safe transfer DTOs
     let users: User[];
     let result: SafeTransferUserDto[];
 
@@ -49,10 +51,11 @@ export class UserController {
     return standardizeResponse(HttpStatus.OK, userSuccess.FETCHED_USER_LIST, result);
   }
   
-  // Get a specific user by username (Accessible by both users and admins)
+  // Get details of the authenticated user
   @Get('details')
   @UserAndAdmin()
   async getOwnDetials(@Req() req: userEmbeddedRequest) {
+    // Retrieve and return the authenticated user's details
     let user: User;
     let result: SafeTransferUserDto;
     try{
@@ -65,10 +68,11 @@ export class UserController {
     return standardizeResponse(HttpStatus.OK, userSuccess.FETCHED_USER, result);
   }
 
-  // Get a specific user by username (Accessible by both users and admins)
+  // Get details of a specific user by username (Admin only)
   @Get('details/:username')
   @AdminOnly()
   async getUser(@Param('username') username: string) {
+    // Retrieve and return details of a specific user
     let user: User;
     try{
       user =  await this.userService.getUserIfSubAdmin(username);
@@ -80,9 +84,11 @@ export class UserController {
     return standardizeResponse(HttpStatus.OK, userSuccess.FETCHED_USER, result);
   }
   
+  // Deactivate the authenticated user's account
   @Patch("deactivate")
   @UserAndAdmin()
   async deactivateSelf(@Req() req: userEmbeddedRequest){
+    // Deactivate the authenticated user's account
     let deactivatedUser: User;
     try{
       deactivatedUser = await this.userService.updateUser(req.user.username, {isActive: false} as UpdateUserDto);
@@ -94,9 +100,11 @@ export class UserController {
     return standardizeResponse(StatusCodes.UPDATED, userSuccess.DEACTIVATED, deactivatedUser);
   }
 
+  // Deactivate a specific user's account (Admin only)
   @Patch("deactivate/:username")
   @AdminOnly()
   async deactivateUser(@Param('username') username: string){
+    // Deactivate a specific user's account
     let deactivatedUser: User;
     try{
       deactivatedUser = await this.userService.updateUser(username, {isActive: false} as UpdateUserDto)
@@ -107,9 +115,11 @@ export class UserController {
     return standardizeResponse(StatusCodes.UPDATED, userSuccess.DEACTIVATED, deactivatedUser)
   }
 
+  // Activate a specific user's account (Admin only)
   @Patch("activate/:username")
   @AdminOnly()
   async activateUser(@Param('username') username: string){
+    // Activate a specific user's account
     let activatedUser: User;
     try{
       activatedUser = await this.userService.updateUser(username, {isActive: true} as UpdateUserDto)
@@ -121,10 +131,11 @@ export class UserController {
     return standardizeResponse(StatusCodes.UPDATED, userSuccess.ACTIVATED, activatedUser);
   }
 
-  // Delete a self (AdminAndUser)
+  // Delete the authenticated user's account
   @Delete("delete")
   @UserAndAdmin()
   async deleteOwnDetails(@Request() req: userEmbeddedRequest) {
+    // Delete the authenticated user's account
     let isUserDeleted: UpdateResult;
     try{
       isUserDeleted = await this.userService.deleteUser(req.user.userId);
@@ -135,10 +146,11 @@ export class UserController {
     return standardizeResponse(StatusCodes.UPDATED, userSuccess.ACTIVATED, isUserDeleted);
   }
   
-  // Delete a user (Admin only)
+  // Delete a specific user's account (Admin only)
   @Delete('delete/:username')
   @AdminOnly()
   async deleteUser(@Param('username') username: string) {
+    // Delete a specific user's account
     let isUserDeleted: UpdateResult;
     try{
       isUserDeleted = await this.userService.deleteUser(username);
@@ -149,10 +161,11 @@ export class UserController {
     return standardizeResponse(StatusCodes.UPDATED, userSuccess.USER_DELETED, isUserDeleted);
   }
 
-  // Update a user (Admin only)
+  // Update a specific user's details (Admin only)
   @Patch(':username')
   @AdminOnly()
   async updateUser(@Param('username') username: string, @Body() updateUserDto: UpdateUserDto) {
+    // Update a specific user's details
     let updatedUser: User;
     try{
       updatedUser = await this.userService.updateUser(username, updateUserDto);
@@ -162,5 +175,4 @@ export class UserController {
     }
     return standardizeResponse(StatusCodes.UPDATED, userSuccess.USER_UPDATED, updatedUser);
   }
-
 }

@@ -4,18 +4,16 @@ import { User } from "../entity/user.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { CreateUserDto, UpdateUserDto } from "../dto/user.dto";
-import { authFailure, dbFailure, errorMessages, userFailure } from "../../utils/constants/errors.constant";
+import { dbFailure, errorMessages } from "../../utils/constants/errors.constant";
 import { validRoleId } from "../entity/role.entity";
 
 @Injectable()
 export class UserRepository extends Repository<User> {
 
-  // Constructor to inject the User repository into this custom repository
   constructor(
-    @InjectRepository(User) // Injecting TypeORM's User repository
+    // @InjectRepository(User) 
     private userRepository: Repository<User>,
   ) {
-    // Super call to inherit behavior from TypeORM's Repository class
     super(
       userRepository.target, 
       userRepository.manager, 
@@ -23,95 +21,100 @@ export class UserRepository extends Repository<User> {
     );
   }
 
-  // Method to find a user by username or email
+  // Find a user by username or email
   async findUser(username?: string, email?: string): Promise<User> {
-    const whereClause: Partial<User> = {}; // Define empty search condition object
+    const whereClause: Partial<User> = {};
 
     // Add search conditions based on input
     if (username) whereClause.username = username;
     else if (email) whereClause.email = email;
-    else throw new BadRequestException(errorMessages.INSUFFICIENT_ARGUMENTS); // Throw error if no arguments provided
+    else throw new BadRequestException(errorMessages.INSUFFICIENT_ARGUMENTS);
 
     let user: User;
     try {
-      // Search for a user based on the where clause
       user = await this.userRepository.findOne({ where: whereClause });
-      if(!user) throw new NotFoundException(dbFailure.DB_ITEM_NOT_FOUND);
+      if (!user) 
+        throw new NotFoundException(dbFailure.DB_ITEM_NOT_FOUND);
     } 
     catch (error) {
+      // Handling database errors
       throw new InternalServerErrorException(dbFailure.DB_FAILURE);
     }
 
-    return user; // Return found user
+    return user;
   }
 
-  // Method to retrieve all users with the role of subAdmin
+  // Retrieve all users with the role of subAdmin
   async getAllSubAdmins(): Promise<User[]> {
     let users: User[];
     try {
-      // Find all users where roleId is subAdmin
       users = await this.userRepository.find({
         where: {
           roleId: validRoleId.subAdmin,
         },
       });
-      if(!users)  
-        throw new NotFoundException(dbFailure.DB_ITEM_NOT_FOUND); // Throw if users are not found
+      if (!users) 
+        throw new NotFoundException(dbFailure.DB_ITEM_NOT_FOUND);
     } 
     catch (error) {
+      // Handling database errors
       throw new InternalServerErrorException(dbFailure.DB_FAILURE);
     }
 
-    return users; // Return array of subAdmins
+    return users;
   }
 
-  // Method to add a new user
+  // Add a new user
   async addUser(newUserData: CreateUserDto) {
-
     let newUser: User;
     try {
-      const usr = this.userRepository.create(newUserData); // Create new user instance
-      newUser = await this.userRepository.save(usr); // Save the user to the database
+      const usr = this.userRepository.create(newUserData);
+      newUser = await this.userRepository.save(usr);
     } 
     catch (error) {
-      console.log(error); // Log error to console for debugging
-      throw new InternalServerErrorException(dbFailure.DB_WRITE_FAILURE); // Throw if saving fails
+      // Handling database errors
+      console.log(error);
+      throw new InternalServerErrorException(dbFailure.DB_WRITE_FAILURE);
     }
 
     return newUser;
   }
 
-  // Method to update an existing user
+  // Update an existing user
   async updateUser(username: string, updateData: UpdateUserDto): Promise<User> {
     let user: User;
     try {
-      user = await this.findUser(username); // Retrieve user by username
+      user = await this.findUser(username);
     } 
     catch (error) {
-      throw error; // Re-throw bad request exceptions
+      // errors are already handled with proper response message in the findUser() itself
+      // just need to re-throw the already handled error here
+      throw error;
     }
 
-    // If password needs to be updated, hash it before updating
+    // Hash password if it needs to be updated
     if (updateData.pass) {
       try {
-        updateData.pass = await bcrypt.hash(updateData.pass, Number(process.env.SALT_ROUNDS)); // Encrypt password
+        updateData.pass = await bcrypt.hash(updateData.pass, Number(process.env.SALT_ROUNDS));
       } 
       catch (error) {
-        throw new Error(errorMessages.ENCRYPTION_FAILURE); // Throw error if encryption fails
+        // Handling encryption errors
+        throw new Error(errorMessages.ENCRYPTION_FAILURE);
       }
     }
 
-    // Update the user's data with new values
+    // Update user data
     Object.assign(user, updateData);
 
     let updatedUser: User;
     try {
-      updatedUser = await this.userRepository.save(user); // Save the updated user
+      updatedUser = await this.userRepository.save(user);
     } 
     catch (error) {
-      throw new InternalServerErrorException(dbFailure.DB_WRITE_FAILURE); // Throw if saving fails
+      // Handling database errors
+      throw new InternalServerErrorException(dbFailure.DB_WRITE_FAILURE);
     }
 
-    return updatedUser; // Return updated user
+    return updatedUser;
   }
 }
