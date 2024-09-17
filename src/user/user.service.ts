@@ -127,8 +127,7 @@ export class UserService {
     try {
       // Attempt to soft delete the user in the repository.
       deletionResult = (await this.userRepository.softDelete(user.id));
-      // const deletionResult:User=await this.userRepository.softDelete(user)
-      // await this.userRepository.save(user);
+
     } catch (error) {
       // Log any errors that occur during deletion.
       console.log(error)

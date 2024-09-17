@@ -4,16 +4,19 @@ import { UserRepository } from "./repository/user.repository";
 import { RoleRepository } from "./repository/role.repository";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User } from "./entity/user.entity";
-import { UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import { validRoleId } from "./entity/role.entity";
 import * as bcrypt from "bcrypt";
 import { UpdateResult } from "typeorm";
+import { UserError } from "../utils/constants/errors.constant";
 
+// testing
 describe('UserService', () => {
   let service: UserService;
   let userRepository: UserRepository;
   let roleRepository: RoleRepository;
 
+  // defining the mock repository
   const mockUserRepository = {
     getAllSubAdmins: jest.fn(),
     findUser: jest.fn(),
@@ -28,13 +31,10 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
+        // providing mock Repository
         {
           provide: UserRepository,
           useValue: mockUserRepository,
-        },
-        {
-          provide: RoleRepository,
-          useValue: mockRoleRepository,
         },
       ],
     }).compile();
@@ -44,10 +44,12 @@ describe('UserService', () => {
     roleRepository = module.get<RoleRepository>(RoleRepository);
   });
 
+  // testing that the service itself is defined
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
+  // testing getAllSubAdmins service method
   describe('getAllSubAdmins', () => {
 
     // test case
@@ -83,6 +85,7 @@ describe('UserService', () => {
     });
   });
 
+  // testing getUser service
   describe('getUser', () => {
 
     // test case
@@ -115,6 +118,7 @@ describe('UserService', () => {
     });
   });
 
+  // testing getUserIfSubAdmin service
   describe('getUserIfSubAdmin', () => {
 
     // test case
@@ -161,6 +165,7 @@ describe('UserService', () => {
     });
   });
 
+  // testing addNewUser service
   describe('addNewUser', () => {
 
     // test case
@@ -199,10 +204,14 @@ describe('UserService', () => {
     });
   });
 
+
+  // testing the updateUser service
   describe('updateUser', () => {
 
     // test case
     it('should update a user successfully', async () => {
+
+      // mocking
       const updateUserDto: UpdateUserDto = {
         firstName: 'Updated',
         lastName: 'User',
@@ -222,10 +231,11 @@ describe('UserService', () => {
         roleId: validRoleId.subAdmin,
       };
 
+      // mock response from the repository function
       mockUserRepository.updateUser.mockResolvedValue(updatedUser);
 
       const result = await service.updateUser('existinguser', updateUserDto);
-      expect(result).toEqual(updatedUser);
+      expect(result).toBe(updatedUser);
     });
 
     // test case
@@ -236,10 +246,14 @@ describe('UserService', () => {
     });
   });
 
+
+  // testing the deleteUser service
   describe('deleteUser', () => {
 
     // test case
     it('should soft delete a user successfully', async () => {
+
+      // mocking
       const user: User = {
         id: '123',
         isActive: true,
@@ -253,7 +267,7 @@ describe('UserService', () => {
         deletedAt: null,
         roleId: validRoleId.subAdmin,
       };
-
+      // mock UpdateResult response Object
       const updateResult: UpdateResult = {
         affected: 1,
         raw: {},
@@ -269,9 +283,11 @@ describe('UserService', () => {
 
     // test case
     it('should throw an error when user is not found', async () => {
-      mockUserRepository.findUser.mockRejectedValue(new Error());
 
-      await expect(service.deleteUser('nonexistent')).rejects.toThrow();
+      // mocking
+      mockUserRepository.findUser.mockRejectedValue(new BadRequestException(UserError.USER_NOT_FOUND));
+
+      await expect(service.deleteUser('nonexistent')).rejects.toThrow(new BadRequestException(UserError.USER_NOT_FOUND));
     });
   });
 });
