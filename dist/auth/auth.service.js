@@ -22,28 +22,6 @@ let AuthService = class AuthService {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
     }
-    async validateUser(username, password) {
-        let user;
-        try {
-            user = await this.userRepository.findUser(username);
-        }
-        catch (error) {
-            throw error;
-        }
-        try {
-            const isMatching = await bcrypt.compare(password, user.pass);
-            console.log(isMatching);
-            if (!isMatching) {
-                throw new common_1.UnauthorizedException(errors_constant_1.userFailure.INVALID_CREDENTIALS);
-            }
-        }
-        catch (error) {
-            if (error instanceof common_1.UnauthorizedException)
-                throw error;
-            throw new common_1.InternalServerErrorException(errors_constant_1.errorMessages.ENCRYPTION_FAILURE);
-        }
-        return user;
-    }
     async login(loginData) {
         let user;
         try {
@@ -53,7 +31,10 @@ let AuthService = class AuthService {
             throw error;
         }
         if (!user.isActive) {
-            throw new common_1.UnauthorizedException(errors_constant_1.authFailure.INACTIVE_USER);
+            throw new common_1.UnauthorizedException(errors_constant_1.AuthError.INACTIVE_USER);
+        }
+        if (user.deletedAt !== null) {
+            throw new common_1.UnauthorizedException(errors_constant_1.AuthError.DELETED_USER);
         }
         const payload = { username: user.username, userId: user.id, roleId: user.roleId };
         return this.jwtService.sign(payload);
@@ -69,13 +50,16 @@ let AuthService = class AuthService {
         try {
             const isMatching = await bcrypt.compare(password, user.pass);
             if (!isMatching) {
-                throw new common_1.UnauthorizedException(errors_constant_1.authFailure.INVALID_CREDENTIALS);
+                throw new common_1.UnauthorizedException(errors_constant_1.AuthError.INVALID_CREDENTIALS);
             }
         }
         catch (error) {
-            if (error instanceof common_1.UnauthorizedException)
+            if (error instanceof common_1.UnauthorizedException) {
                 throw error;
-            throw new common_1.InternalServerErrorException(errors_constant_1.errorMessages.ENCRYPTION_FAILURE);
+            }
+            else {
+                throw new common_1.InternalServerErrorException(errors_constant_1.ErrorMessages.ENCRYPTION_ERROR);
+            }
         }
         return user;
     }

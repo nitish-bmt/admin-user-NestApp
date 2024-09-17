@@ -13,7 +13,7 @@ let HealthcheckService = class HealthcheckService {
     healthcheck() {
         const healthResponse = new healthcheck_dto_1.HealthcheckDto;
         healthResponse.status = 200;
-        healthResponse.message = "All OK";
+        healthResponse.message = "Server is running";
         healthResponse.serverUptime = this.formattedServerUptime();
         return healthResponse;
     }

@@ -4,7 +4,7 @@ import { User } from "./entity/user.entity";
 import { RoleRepository } from "./repository/role.repository";
 import { UpdateResult } from "typeorm";
 export declare class UserService {
-    private userRepository;
+    private readonly userRepository;
     private readonly roleRepository;
     constructor(userRepository: UserRepository, roleRepository: RoleRepository);
     userEntityToShareableDto(user: User): SafeTransferUserDto;

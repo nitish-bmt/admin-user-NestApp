@@ -14,12 +14,31 @@ import { RoleRepository } from "./repository/role.repository";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserRepository, Role]),
-    // AuthService
+    TypeOrmModule.forFeature([
+      User, 
+      UserRepository, 
+      Role, 
+      RoleRepository
+    ]),
   ],
-  providers: [UserService, UserRepository, RoleRepository, AuthService, JwtService, JwtAuthGuard, RolesGuard],
-  controllers: [UserController],
-  exports: [TypeOrmModule, UserService, UserRepository, RoleRepository],
+  providers: [
+    UserService, 
+    UserRepository, 
+    RoleRepository, 
+    AuthService, 
+    JwtService, 
+    JwtAuthGuard, 
+    RolesGuard
+  ],
+  controllers: [
+    UserController
+  ],
+  exports: [
+    TypeOrmModule, 
+    UserService, 
+    UserRepository,   
+    RoleRepository
+  ],
 })
 export class UserModule {
   constructor(private dataSource: DataSource){}

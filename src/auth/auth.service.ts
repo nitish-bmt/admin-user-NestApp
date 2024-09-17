@@ -5,12 +5,13 @@ import { UserService } from '../user/user.service';
 import { UserRepository } from '../user/repository/user.repository';
 import { JwtPayload } from '../utils/types';
 import { LoginUserDto } from '../user/dto/user.dto';
-import { authFailure, errorMessages, userFailure } from '../utils/constants/errors.constant';
 import { User } from '../user/entity/user.entity';
+import { AuthError, ErrorMessages } from '../utils/constants/errors.constant';
 
 // Authentication service responsible for handling user login and authentication.
 @Injectable()
 export class AuthService {
+
   // Constructor to inject dependencies.
   // @param userService User service instance.
   // @param userRepository User repository instance.
@@ -30,7 +31,8 @@ export class AuthService {
     // Attempt to authenticate the user using the provided login data.
     try {
       user = await this.authenticateUser(loginData.username, loginData.pass);
-    } catch (error) {
+    }
+    catch (error) {
       // If authentication fails, re-throw the error.
       throw error;
     }
@@ -38,7 +40,10 @@ export class AuthService {
     // Check if the authenticated user is active.
     if (!user.isActive) {
       // If the user is not active, throw an unauthorized exception.
-      throw new UnauthorizedException(authFailure.INACTIVE_USER);
+      throw new UnauthorizedException(AuthError.INACTIVE_USER);
+    }
+    if(user.deletedAt !== null){
+      throw new UnauthorizedException(AuthError.DELETED_USER);
     }
 
     // Create a JWT payload containing the user's details.
@@ -69,16 +74,17 @@ export class AuthService {
 
       // If the passwords do not match, throw an unauthorized exception.
       if (!isMatching) {
-        throw new UnauthorizedException(authFailure.INVALID_CREDENTIALS);
+        throw new UnauthorizedException(AuthError.INVALID_CREDENTIALS);
       }
-    } catch (error) {
+    } 
+    catch (error) {
       // If an error occurs during password comparison, check if it's an unauthorized exception.
       if (error instanceof UnauthorizedException) {
         // If it's an unauthorized exception, re-throw it.
         throw error;
       } else {
         // If it's not an unauthorized exception, throw an internal server error.
-        throw new InternalServerErrorException(errorMessages.ENCRYPTION_FAILURE);
+        throw new InternalServerErrorException(ErrorMessages.ENCRYPTION_ERROR);
       }
     }
 

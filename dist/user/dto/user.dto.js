@@ -14,13 +14,10 @@ const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 const role_entity_1 = require("../entity/role.entity");
 const class_transformer_1 = require("class-transformer");
+const user_entity_1 = require("../entity/user.entity");
 class CreateUserDto {
 }
 exports.CreateUserDto = CreateUserDto;
-__decorate([
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], CreateUserDto.prototype, "id", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
@@ -51,39 +48,37 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsNumberString)(),
+    (0, class_validator_1.IsPhoneNumber)('IN'),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "contact", void 0);
-class SafeTransferUserDto extends CreateUserDto {
+class SafeTransferUserDto extends user_entity_1.User {
 }
 exports.SafeTransferUserDto = SafeTransferUserDto;
 __decorate([
     (0, class_transformer_1.Exclude)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], SafeTransferUserDto.prototype, "pass", void 0);
 __decorate([
     (0, class_transformer_1.Exclude)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsEmail)(),
-    __metadata("design:type", String)
-], SafeTransferUserDto.prototype, "email", void 0);
-__decorate([
-    (0, class_transformer_1.Exclude)(),
     __metadata("design:type", Date)
 ], SafeTransferUserDto.prototype, "deletedAt", void 0);
-__decorate([
-    (0, class_transformer_1.Exclude)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", Number)
-], SafeTransferUserDto.prototype, "roleId", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], SafeTransferUserDto.prototype, "role", void 0);
-class UpdateUserDto extends (0, swagger_1.PartialType)(SafeTransferUserDto) {
+class UpdateUserDto extends (0, swagger_1.PartialType)(CreateUserDto) {
 }
 exports.UpdateUserDto = UpdateUserDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "pass", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Exclude)(),
+    __metadata("design:type", Date)
+], UpdateUserDto.prototype, "deletedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Exclude)(),
+    __metadata("design:type", Number)
+], UpdateUserDto.prototype, "roleId", void 0);
 class LoginUserDto {
 }
 exports.LoginUserDto = LoginUserDto;

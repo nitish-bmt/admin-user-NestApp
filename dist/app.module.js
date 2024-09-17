@@ -22,6 +22,7 @@ const app_service_1 = require("./app.service");
 const role_entity_1 = require("./user/entity/role.entity");
 const auth_controller_1 = require("./auth/auth.controller");
 const roles_guard_1 = require("./auth/roles.guard");
+const http_exception_filter_1 = require("./global/http-exception.filter");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -55,6 +56,10 @@ exports.AppModule = AppModule = __decorate([
             {
                 provide: core_1.APP_GUARD,
                 useClass: roles_guard_1.RolesGuard,
+            },
+            {
+                provide: core_1.APP_FILTER,
+                useClass: http_exception_filter_1.HttpExceptionFilter,
             },
             jwt_strategy_1.JwtStrategy
         ]

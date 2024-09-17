@@ -1,38 +1,36 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authFailure = exports.userFailure = exports.userCreationFailure = exports.dbFailure = exports.errorMessages = void 0;
-var errorMessages;
-(function (errorMessages) {
-    errorMessages["INSUFFICIENT_ARGUMENTS"] = "Too few arguments passed";
-    errorMessages["ENCRYPTION_FAILURE"] = "Encryption failed";
-})(errorMessages || (exports.errorMessages = errorMessages = {}));
-var dbFailure;
-(function (dbFailure) {
-    dbFailure["DB_FAILURE"] = "COULD NOT CONNECT TO DB";
-    dbFailure["DB_WRITE_FAILURE"] = "COULD NOT WRITE TO DB";
-    dbFailure["DB_READ_FAILURE"] = "COULD NOT READ FROM DB";
-    dbFailure["DB_SEARCH_FAILURE"] = "COULD NOT FIND DB";
-    dbFailure["DB_ITEM_NOT_FOUND"] = "ITEM NOT FOUND IN DB";
-    dbFailure["EMPTY_DB_STRING"] = "RECEIVED EMPTY DB STRING ";
-    dbFailure["DB_ITEM_NOT_DELETED"] = "COULD NOT DELETE THE ITEM";
-})(dbFailure || (exports.dbFailure = dbFailure = {}));
-var userCreationFailure;
-(function (userCreationFailure) {
-    userCreationFailure["FAILURE"] = "Could not register new user.";
-    userCreationFailure["EMAIL_ALREADY_REGISTERED"] = "Email already registered. Try with another email.";
-    userCreationFailure["USERNAME_ALREADY_TAKEN"] = "Username already taken. Try with another username.";
-})(userCreationFailure || (exports.userCreationFailure = userCreationFailure = {}));
-var userFailure;
-(function (userFailure) {
-    userFailure["INVALID_CREDENTIALS"] = "Credentials do not match";
-    userFailure["USER_NOT_FOUND"] = "User does not exist";
-    userFailure["USER_NOT_DELETED"] = "COULD NOT DELETE THE USER";
-    userFailure["ADMIN_PRIVACY"] = "ADMIN CAN ONLY GET SUB ADMINS";
-})(userFailure || (exports.userFailure = userFailure = {}));
-var authFailure;
-(function (authFailure) {
-    authFailure["FAILURE"] = "Could not login";
-    authFailure["INACTIVE_USER"] = "Inactive users are not allowed";
-    authFailure["INVALID_CREDENTIALS"] = "username and password do not match";
-})(authFailure || (exports.authFailure = authFailure = {}));
+exports.AuthError = exports.UserError = exports.UserCreationError = exports.DbError = exports.ErrorMessages = void 0;
+var ErrorMessages;
+(function (ErrorMessages) {
+    ErrorMessages["INSUFFICIENT_ARGUMENTS"] = "TOO FEW ARGUMENTS PASSED";
+    ErrorMessages["ENCRYPTION_ERROR"] = "ENCRYPTION FAILED";
+})(ErrorMessages || (exports.ErrorMessages = ErrorMessages = {}));
+var DbError;
+(function (DbError) {
+    DbError["CONNECTION_ERROR"] = "COULD NOT CONNECT TO DB";
+    DbError["WRITE_ERROR"] = "COULD NOT WRITE TO DB";
+    DbError["READ_ERROR"] = "COULD NOT READ FROM DB";
+})(DbError || (exports.DbError = DbError = {}));
+var UserCreationError;
+(function (UserCreationError) {
+    UserCreationError["ERROR"] = "COULD NOT REGISTER NEW USER";
+    UserCreationError["EMAIL_ALREADY_REGISTERED"] = "EMAIL ALREADY REGISTERED. TRY WITH ANOTHER EMAIL";
+    UserCreationError["USERNAME_ALREADY_TAKEN"] = "USERNAME ALREADY TAKEN. TRY WITH ANOTHER USERNAME";
+})(UserCreationError || (exports.UserCreationError = UserCreationError = {}));
+var UserError;
+(function (UserError) {
+    UserError["INVALID_CREDENTIALS"] = "CREDENTIALS DO NOT MATCH";
+    UserError["USER_NOT_CREATED"] = "COULD NOT CREATE THE USER";
+    UserError["USER_NOT_FOUND"] = "USER DOES NOT EXIST";
+    UserError["USER_NOT_DELETED"] = "COULD NOT DELETE THE USER";
+    UserError["ADMIN_PRIVACY"] = "ADMIN CAN ONLY GET SUB ADMINS";
+})(UserError || (exports.UserError = UserError = {}));
+var AuthError;
+(function (AuthError) {
+    AuthError["ERROR"] = "COULD NOT LOGIN";
+    AuthError["INACTIVE_USER"] = "INACTIVE USERS ARE NOT ALLOWED";
+    AuthError["DELETED_USER"] = "USER HAS BEEN DELETED";
+    AuthError["INVALID_CREDENTIALS"] = "USERNAME AND PASSWORD DO NOT MATCH";
+})(AuthError || (exports.AuthError = AuthError = {}));
 //# sourceMappingURL=errors.constant.js.map

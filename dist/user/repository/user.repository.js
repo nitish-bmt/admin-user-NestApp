@@ -18,8 +18,8 @@ const typeorm_1 = require("@nestjs/typeorm");
 const user_entity_1 = require("../entity/user.entity");
 const typeorm_2 = require("typeorm");
 const bcrypt = require("bcrypt");
-const errors_constant_1 = require("../../utils/constants/errors.constant");
 const role_entity_1 = require("../entity/role.entity");
+const errors_constant_1 = require("../../utils/constants/errors.constant");
 let UserRepository = class UserRepository extends typeorm_2.Repository {
     constructor(userRepository) {
         super(userRepository.target, userRepository.manager, userRepository.queryRunner);
@@ -27,20 +27,24 @@ let UserRepository = class UserRepository extends typeorm_2.Repository {
     }
     async findUser(username, email) {
         const whereClause = {};
-        if (username)
+        if (username.length > 0)
             whereClause.username = username;
         else if (email)
             whereClause.email = email;
         else
-            throw new common_1.BadRequestException(errors_constant_1.errorMessages.INSUFFICIENT_ARGUMENTS);
+            throw new common_1.BadRequestException(errors_constant_1.ErrorMessages.INSUFFICIENT_ARGUMENTS);
         let user;
         try {
             user = await this.userRepository.findOne({ where: whereClause });
             if (!user)
-                throw new common_1.NotFoundException(errors_constant_1.dbFailure.DB_ITEM_NOT_FOUND);
+                throw new common_1.NotFoundException(errors_constant_1.UserError.USER_NOT_FOUND);
         }
         catch (error) {
-            throw new common_1.InternalServerErrorException(errors_constant_1.dbFailure.DB_FAILURE);
+            if (error instanceof common_1.BadRequestException)
+                throw error;
+            if (error instanceof common_1.NotFoundException)
+                throw error;
+            throw new common_1.InternalServerErrorException(errors_constant_1.DbError.CONNECTION_ERROR);
         }
         return user;
     }
@@ -53,10 +57,10 @@ let UserRepository = class UserRepository extends typeorm_2.Repository {
                 },
             });
             if (!users)
-                throw new common_1.NotFoundException(errors_constant_1.dbFailure.DB_ITEM_NOT_FOUND);
+                throw new common_1.NotFoundException(errors_constant_1.UserError.USER_NOT_FOUND);
         }
         catch (error) {
-            throw new common_1.InternalServerErrorException(errors_constant_1.dbFailure.DB_FAILURE);
+            throw new common_1.InternalServerErrorException(errors_constant_1.UserError.USER_NOT_FOUND);
         }
         return users;
     }
@@ -67,8 +71,7 @@ let UserRepository = class UserRepository extends typeorm_2.Repository {
             newUser = await this.userRepository.save(usr);
         }
         catch (error) {
-            console.log(error);
-            throw new common_1.InternalServerErrorException(errors_constant_1.dbFailure.DB_WRITE_FAILURE);
+            throw new common_1.InternalServerErrorException(error.message);
         }
         return newUser;
     }
@@ -85,7 +88,7 @@ let UserRepository = class UserRepository extends typeorm_2.Repository {
                 updateData.pass = await bcrypt.hash(updateData.pass, Number(process.env.SALT_ROUNDS));
             }
             catch (error) {
-                throw new Error(errors_constant_1.errorMessages.ENCRYPTION_FAILURE);
+                throw new Error(errors_constant_1.ErrorMessages.ENCRYPTION_ERROR);
             }
         }
         Object.assign(user, updateData);
@@ -94,7 +97,7 @@ let UserRepository = class UserRepository extends typeorm_2.Repository {
             updatedUser = await this.userRepository.save(user);
         }
         catch (error) {
-            throw new common_1.InternalServerErrorException(errors_constant_1.dbFailure.DB_WRITE_FAILURE);
+            throw new common_1.InternalServerErrorException(error.message);
         }
         return updatedUser;
     }

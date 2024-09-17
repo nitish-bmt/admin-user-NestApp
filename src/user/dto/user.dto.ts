@@ -1,16 +1,14 @@
 // import { Prop } from "@nestjs/mongoose";
 // import { Exclude, Expose } from "class-transformer";
-import { IS_NOT_EMPTY, IsEmail, IsNotEmpty, IsNumberString, IsOptional} from "class-validator";
+import { IS_NOT_EMPTY, IsEmail, IsNotEmpty, IsNumberString, IsOptional, IsPhoneNumber} from "class-validator";
 import { OmitType, PartialType } from "@nestjs/swagger"
 import { validRoleId, validRoleType } from "../entity/role.entity";
 import { Exclude } from "class-transformer";
+import { User } from "../entity/user.entity";
 
 
 // data transfer object
 export class CreateUserDto{
-
-  @IsOptional()
-  id: string;
 
   @IsOptional()
   roleId: validRoleId;
@@ -34,35 +32,33 @@ export class CreateUserDto{
   @IsEmail()
   email: string;
 
-  @IsNumberString()
+  @IsPhoneNumber('IN')
   contact: string;
 }
 
 // to show data
-export class SafeTransferUserDto extends CreateUserDto{
+export class SafeTransferUserDto extends User{
   @Exclude()
-  @IsNotEmpty()
   pass: string;
 
   @Exclude()
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @Exclude()
   deletedAt: Date;
-
-  @Exclude()
-  @IsNotEmpty()
-  roleId: validRoleId;
-
-  @IsNotEmpty()
-  role: string;
-
 }
 
 // data transfer object
-export class UpdateUserDto extends PartialType(SafeTransferUserDto) {}
+export class UpdateUserDto extends PartialType(CreateUserDto) {
+
+  @IsOptional()
+  pass?: string;
+
+  @IsOptional()
+  @Exclude()
+  deletedAt?: Date;
+
+  @IsOptional()
+  @Exclude()
+  roleId?: validRoleId;
+}
 
 export class LoginUserDto{
   

@@ -1,6 +1,6 @@
 import { validRoleId } from "../entity/role.entity";
+import { User } from "../entity/user.entity";
 export declare class CreateUserDto {
-    id: string;
     roleId: validRoleId;
     isActive: boolean;
     firstName: string;
@@ -10,15 +10,15 @@ export declare class CreateUserDto {
     email: string;
     contact: string;
 }
-export declare class SafeTransferUserDto extends CreateUserDto {
+export declare class SafeTransferUserDto extends User {
     pass: string;
-    email: string;
     deletedAt: Date;
-    roleId: validRoleId;
-    role: string;
 }
-declare const UpdateUserDto_base: import("@nestjs/common").Type<Partial<SafeTransferUserDto>>;
+declare const UpdateUserDto_base: import("@nestjs/common").Type<Partial<CreateUserDto>>;
 export declare class UpdateUserDto extends UpdateUserDto_base {
+    pass?: string;
+    deletedAt?: Date;
+    roleId?: validRoleId;
 }
 export declare class LoginUserDto {
     username: string;

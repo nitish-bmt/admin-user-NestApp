@@ -1,39 +1,37 @@
-export declare enum errorMessages {
-    INSUFFICIENT_ARGUMENTS = "Too few arguments passed",
-    ENCRYPTION_FAILURE = "Encryption failed"
+export declare enum ErrorMessages {
+    INSUFFICIENT_ARGUMENTS = "TOO FEW ARGUMENTS PASSED",
+    ENCRYPTION_ERROR = "ENCRYPTION FAILED"
 }
-export declare const enum validationErrorMessages {
-    IsNotEmpty = "IsNotEmpty",
-    MinLength = "MinLength",
-    MaxLength = "MaxLength",
-    StrongPassword = "StrongPassword",
-    IsEqualTo = "IsEqualTo",
-    IsString = "IsString",
-    UniqueValidate = "UniqueValidate",
-    IsEmail = "IsEmail"
+export declare const enum ValidationErrorMessages {
+    IS_NOT_EMPTY = "IS NOT EMPTY",
+    MIN_LENGTH = "MIN LENGTH",
+    MAX_LENGTH = "MAX LENGTH",
+    STRONG_PASSWORD = "STRONG PASSWORD",
+    IS_EQUAL_TO = "IS EQUAL TO",
+    IS_STRING = "IS STRING",
+    UNIQUE_VALIDATE = "UNIQUE VALIDATE",
+    IS_EMAIL = "IS EMAIL"
 }
-export declare enum dbFailure {
-    DB_FAILURE = "COULD NOT CONNECT TO DB",
-    DB_WRITE_FAILURE = "COULD NOT WRITE TO DB",
-    DB_READ_FAILURE = "COULD NOT READ FROM DB",
-    DB_SEARCH_FAILURE = "COULD NOT FIND DB",
-    DB_ITEM_NOT_FOUND = "ITEM NOT FOUND IN DB",
-    EMPTY_DB_STRING = "RECEIVED EMPTY DB STRING ",
-    DB_ITEM_NOT_DELETED = "COULD NOT DELETE THE ITEM"
+export declare enum DbError {
+    CONNECTION_ERROR = "COULD NOT CONNECT TO DB",
+    WRITE_ERROR = "COULD NOT WRITE TO DB",
+    READ_ERROR = "COULD NOT READ FROM DB"
 }
-export declare enum userCreationFailure {
-    FAILURE = "Could not register new user.",
-    EMAIL_ALREADY_REGISTERED = "Email already registered. Try with another email.",
-    USERNAME_ALREADY_TAKEN = "Username already taken. Try with another username."
+export declare enum UserCreationError {
+    ERROR = "COULD NOT REGISTER NEW USER",
+    EMAIL_ALREADY_REGISTERED = "EMAIL ALREADY REGISTERED. TRY WITH ANOTHER EMAIL",
+    USERNAME_ALREADY_TAKEN = "USERNAME ALREADY TAKEN. TRY WITH ANOTHER USERNAME"
 }
-export declare enum userFailure {
-    INVALID_CREDENTIALS = "Credentials do not match",
-    USER_NOT_FOUND = "User does not exist",
+export declare enum UserError {
+    INVALID_CREDENTIALS = "CREDENTIALS DO NOT MATCH",
+    USER_NOT_CREATED = "COULD NOT CREATE THE USER",
+    USER_NOT_FOUND = "USER DOES NOT EXIST",
     USER_NOT_DELETED = "COULD NOT DELETE THE USER",
     ADMIN_PRIVACY = "ADMIN CAN ONLY GET SUB ADMINS"
 }
-export declare enum authFailure {
-    FAILURE = "Could not login",
-    INACTIVE_USER = "Inactive users are not allowed",
-    INVALID_CREDENTIALS = "username and password do not match"
+export declare enum AuthError {
+    ERROR = "COULD NOT LOGIN",
+    INACTIVE_USER = "INACTIVE USERS ARE NOT ALLOWED",
+    DELETED_USER = "USER HAS BEEN DELETED",
+    INVALID_CREDENTIALS = "USERNAME AND PASSWORD DO NOT MATCH"
 }

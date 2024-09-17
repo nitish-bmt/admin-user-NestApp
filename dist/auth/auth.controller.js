@@ -26,10 +26,10 @@ let AuthController = class AuthController {
     async login(loginCredentials) {
         try {
             const token = await this.authService.login(loginCredentials);
-            return (0, utilityFunction_1.standardizeResponse)(common_1.HttpStatus.ACCEPTED, success_constant_1.userSuccess.LOGGED_IN, token);
+            return (0, utilityFunction_1.standardizeResponse)(common_1.HttpStatus.ACCEPTED, success_constant_1.UserSuccess.LOGGED_IN, token);
         }
         catch (error) {
-            return (0, utilityFunction_1.standardizeErrorResponse)(error);
+            throw error;
         }
     }
 };

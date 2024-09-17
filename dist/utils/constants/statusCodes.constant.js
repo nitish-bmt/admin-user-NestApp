@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StatusCodes = void 0;
 var StatusCodes;
 (function (StatusCodes) {
-    StatusCodes[StatusCodes["HttpStatus"] = 0] = "HttpStatus";
     StatusCodes[StatusCodes["UPDATED"] = 204] = "UPDATED";
+    StatusCodes[StatusCodes["DELETED"] = 204] = "DELETED";
     StatusCodes[StatusCodes["VALIDATION_ERROR"] = 1002] = "VALIDATION_ERROR";
     StatusCodes[StatusCodes["INTERNAL_SERVER_ERROR"] = 1003] = "INTERNAL_SERVER_ERROR";
     StatusCodes[StatusCodes["NOT_FOUND"] = 404] = "NOT_FOUND";

@@ -7,7 +7,7 @@ export class HealthcheckService{
   healthcheck(): HealthcheckDto{
     const healthResponse = new HealthcheckDto;
     healthResponse.status = 200;
-    healthResponse.message = "All OK";
+    healthResponse.message = "Server is running";
     healthResponse.serverUptime = this.formattedServerUptime();
     return healthResponse;
   }

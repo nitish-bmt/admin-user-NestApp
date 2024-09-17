@@ -8,7 +8,7 @@ export interface userEmbeddedRequest extends Request {
 }
 export interface StandardResponse {
     status: number;
-    message: string;
     success: boolean;
+    message: string;
     response?: any;
 }

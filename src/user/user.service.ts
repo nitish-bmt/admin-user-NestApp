@@ -1,20 +1,21 @@
-import { HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException} from "@nestjs/common";
+import { BadRequestException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException} from "@nestjs/common";
 import { UserRepository } from "./repository/user.repository";
 import * as bcrypt from "bcrypt";
 import { CreateUserDto, SafeTransferUserDto, UpdateUserDto } from "./dto/user.dto";
 import { validRoleId } from "./entity/role.entity";
 import { User } from "./entity/user.entity";
-import { plainToClass } from "class-transformer";
+import { plainToClass, plainToInstance } from "class-transformer";
 import { RoleRepository } from "./repository/role.repository";
-import { dbFailure, errorMessages, userFailure } from "../utils/constants/errors.constant";
 import { UpdateResult } from "typeorm";
+import { ErrorMessages, UserError } from "../utils/constants/errors.constant";
 
 // User service to handle user-related operations.
 @Injectable()
 export class UserService {
-  // Constructor to initialize the user and role repositories.
+
+  // injecting the repositories
   constructor(
-    private userRepository: UserRepository,
+    private readonly userRepository: UserRepository,
     private readonly roleRepository: RoleRepository,
   ){}
 
@@ -58,7 +59,7 @@ export class UserService {
 
     // Check if the user is an admin and throw an unauthorized exception if so.
     if(user.roleId == validRoleId.admin){
-      throw new UnauthorizedException(userFailure.ADMIN_PRIVACY)
+      throw new UnauthorizedException(UserError.ADMIN_PRIVACY)
     }
 
     // Return the user if they are a sub-admin.
@@ -70,12 +71,14 @@ export class UserService {
     // Set the default role to sub-admin if not provided.
     newUserData.roleId = newUserData.roleId ? ( newUserData.roleId) : (validRoleId.subAdmin);
 
+    // newUserData = plainToInstance(User, newUserData);
+
     try {
       // Attempt to hash the user's password.
       newUserData.pass = await bcrypt.hash(newUserData.pass, Number(process.env.SALT_ROUNDS));
     } catch (error) {
       // If an error occurs during hashing, throw an internal server error.
-      throw new InternalServerErrorException(errorMessages.ENCRYPTION_FAILURE);
+      throw new InternalServerErrorException(ErrorMessages.ENCRYPTION_ERROR);
     }
 
     let newUser: User;
@@ -84,7 +87,7 @@ export class UserService {
       newUser = await this.userRepository.addUser(newUserData);
     } catch (error) {
       // If an error occurs during addition, throw a database write failure error.
-      throw dbFailure.DB_WRITE_FAILURE;
+      throw new BadRequestException(error.message);
     }
 
     // Return the newly added user.
@@ -93,12 +96,13 @@ export class UserService {
   
   // Update a user.
   async updateUser(username: string, dataToUpdate: UpdateUserDto) {
+    
     let updatedUser: User;
-
     try {
       // Attempt to update the user in the repository.
       updatedUser = await this.userRepository.updateUser(username, dataToUpdate);
-    } catch (error) {
+    } 
+    catch (error) {
       // If an error occurs, rethrow it to be handled by the caller.
       throw error;
     }
@@ -122,7 +126,9 @@ export class UserService {
     let deletionResult: UpdateResult;
     try {
       // Attempt to soft delete the user in the repository.
-      deletionResult = (await this.userRepository.softDelete(user));
+      deletionResult = (await this.userRepository.softDelete(user.id));
+      // const deletionResult:User=await this.userRepository.softDelete(user)
+      // await this.userRepository.save(user);
     } catch (error) {
       // Log any errors that occur during deletion.
       console.log(error)

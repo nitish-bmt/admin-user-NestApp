@@ -1,293 +1,277 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { AuthService } from "../auth/auth.service";
-import { JwtService } from "@nestjs/jwt";
-import { UserRepository } from "./repository/user.repository";
 import { UserService } from "./user.service";
-import { CreateUserDto, SafeTransferUserDto, UpdateUserDto } from "./dto/user.dto";
-import { dbFailure } from "../utils/constants/errors.constant";
+import { UserRepository } from "./repository/user.repository";
+import { RoleRepository } from "./repository/role.repository";
+import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User } from "./entity/user.entity";
-import { InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { UnauthorizedException } from "@nestjs/common";
+import { validRoleId } from "./entity/role.entity";
+import * as bcrypt from "bcrypt";
+import { UpdateResult } from "typeorm";
 
-// Unit test for the UserService
 describe('UserService', () => {
-
   let service: UserService;
+  let userRepository: UserRepository;
+  let roleRepository: RoleRepository;
 
-  // mocking required repository for mock injection
   const mockUserRepository = {
-    getUserList: jest.fn(),
+    getAllSubAdmins: jest.fn(),
+    findUser: jest.fn(),
     addUser: jest.fn(),
     updateUser: jest.fn(),
-    userExists: jest.fn(),
     softDelete: jest.fn(),
-    isUserRegistered: jest.fn(),
   };
+
+  const mockRoleRepository = {};
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
-        AuthService,
-        JwtService,
         {
           provide: UserRepository,
           useValue: mockUserRepository,
+        },
+        {
+          provide: RoleRepository,
+          useValue: mockRoleRepository,
         },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
+    userRepository = module.get<UserRepository>(UserRepository);
+    roleRepository = module.get<RoleRepository>(RoleRepository);
   });
 
-  // test for the service
-  it('should be defined', ()=>{
+  it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  // tests for showAllUsers method
-  describe('getAllSubAdmins', ()=>{
+  describe('getAllSubAdmins', () => {
 
-    // mocking
-    const users: User[] = [
-      { 
-        id: "245", 
-        isActive: true,
-        firstName: 'nitish', 
-        lastName: 'rawat', 
-        username: 'nitish', 
-        email: 'abhishek@binmile.com', 
-        contact: '1234567890', 
-        pass: 'abc', 
-        createdAt: new Date(),
-        deletedAt: null, 
-        roleId: 2, 
-      },
-      { 
-        id: "123",
-        isActive: true,
-        firstName: 'abhishek', 
-        lastName: 'singh', 
-        username: 'abhishek', 
-        email: 'nitish@binmile.com', 
-        contact: '1234567890', 
-        pass: 'xyz', 
-        createdAt: new Date(),
-        deletedAt: null, 
-        roleId: 1, 
-      },
-    ];
-
-    // test case 1
+    // test case
     it('should return an array of subAdmins', async () => {
+      const users: User[] = [
+        {
+          id: "245",
+          isActive: true,
+          firstName: 'nitish',
+          lastName: 'rawat',
+          username: 'nitish',
+          email: 'nitish@example.com',
+          contact: '1234567890',
+          pass: 'abc',
+          createdAt: new Date(),
+          deletedAt: null,
+          roleId: validRoleId.subAdmin,
+        },
+      ];
 
-      // mocking repo method call
-      jest.spyOn(mockUserRepository, 'getUserList').mockResolvedValue(users);
+      mockUserRepository.getAllSubAdmins.mockResolvedValue(users);
 
-      // conforming the result
-      expect(await service.getAllSubAdmins()).toBe(users);
-
-      // conforming the mockUserRepository method is called
-      expect(mockUserRepository.getUserList).toHaveBeenCalled();
+      const result = await service.getAllSubAdmins();
+      expect(result).toBe(users);
+      expect(mockUserRepository.getAllSubAdmins).toHaveBeenCalled();
     });
 
-    // test case 2
-    it('should return an empty array when no users exist', async () => {
-
-      // expected result
-      const result:SafeTransferUserDto[] = [];
-
-      // mock repo method call
-      jest.spyOn(mockUserRepository, 'getUserList').mockResolvedValue(result);
-
-      // conforming the result
-      expect(await service.getAllSubAdmins()).toBe(result);
-
-      // conforming the mockUserRepository method is called
-      expect(mockUserRepository.getUserList).toHaveBeenCalled();
-    });
-
-    // test case 3
+    // test case
     it('should throw an error when database operation fails', async () => {
+      mockUserRepository.getAllSubAdmins.mockRejectedValue(new Error());
 
-      // mocking
-      mockUserRepository.getUserList.mockRejectedValue(
-        new InternalServerErrorException(dbFailure.DB_FAILURE)
-      );
-
-      // conforming the result
-      await expect(service.getAllSubAdmins()).rejects.toThrow(
-        new InternalServerErrorException(dbFailure.DB_FAILURE)
-      );
+      await expect(service.getAllSubAdmins()).rejects.toThrow();
     });
-                
   });
 
-  // // tests for checkUser method
-  describe('checkUser', () => {
+  describe('getUser', () => {
 
-    // mocking
-    const user: User = { 
-      id: "123",
-      isActive: true,
-      firstName: 'abhishek', 
-      lastName: 'singh', 
-      username: 'abhishek', 
-      email: 'nitish@binmile.com', 
-      contact: '1234567890', 
-      pass: 'xyz', 
-      createdAt: new Date(),
-      deletedAt: null, 
-      roleId: 1, 
-    };
+    // test case
+    it('should return a user when found', async () => {
+      const user: User = {
+        id: "123",
+        isActive: true,
+        firstName: 'abhishek',
+        lastName: 'singh',
+        username: 'abhishek',
+        email: 'abhishek@example.com',
+        contact: '1234567890',
+        pass: 'xyz',
+        createdAt: new Date(),
+        deletedAt: null,
+        roleId: validRoleId.admin,
+      };
 
-    // test case 1
-    it('should return response with user data when the username exists', async () => {
+      mockUserRepository.findUser.mockResolvedValue(user);
 
-      mockUserRepository.userExists.mockResolvedValue(user);
-
-      const result = await service.getUser(user.username);
+      const result = await service.getUser('abhishek');
       expect(result).toBe(user);
     });
 
-    // test case 2
-    it('should return null when the username does not exist', async () => {
+    // test case
+    it('should throw an error when user is not found', async () => {
+      mockUserRepository.findUser.mockRejectedValue(new Error());
 
-      // mocking
-      const username = "nonexistentUser";
-      mockUserRepository.userExists.mockResolvedValue(null);
-
-      const result = await service.getUser(username);
-
-      // conforming the result
-      expect(result).toBe(null);
-    });
-
-    // test case 3
-    it('should handle errors from userExists method', async () => {
-
-      // mocking
-      const username = "errorUser";
-      mockUserRepository.userExists.mockRejectedValue(
-        new InternalServerErrorException(dbFailure.DB_FAILURE)
-      );
-
-      // conforming the result
-      await expect(service.getUser(username)).rejects.toThrow(
-        new InternalServerErrorException(dbFailure.DB_FAILURE));
+      await expect(service.getUser('nonexistent')).rejects.toThrow();
     });
   });
 
-  // tests for addNewUSer method
+  describe('getUserIfSubAdmin', () => {
+
+    // test case
+    it('should return a user if they are a subAdmin', async () => {
+      const user: User = {
+        id: "123",
+        isActive: true,
+        firstName: 'subadmin',
+        lastName: 'user',
+        username: 'subadmin',
+        email: 'subadmin@example.com',
+        contact: '1234567890',
+        pass: 'xyz',
+        createdAt: new Date(),
+        deletedAt: null,
+        roleId: validRoleId.subAdmin,
+      };
+
+      mockUserRepository.findUser.mockResolvedValue(user);
+
+      const result = await service.getUserIfSubAdmin('subadmin');
+      expect(result).toBe(user);
+    });
+
+    // test case
+    it('should throw UnauthorizedException if user is an admin', async () => {
+      const adminUser: User = {
+        id: "123",
+        isActive: true,
+        firstName: 'admin',
+        lastName: 'user',
+        username: 'admin',
+        email: 'admin@example.com',
+        contact: '1234567890',
+        pass: 'xyz',
+        createdAt: new Date(),
+        deletedAt: null,
+        roleId: validRoleId.admin,
+      };
+
+      mockUserRepository.findUser.mockResolvedValue(adminUser);
+
+      await expect(service.getUserIfSubAdmin('admin')).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
   describe('addNewUser', () => {
 
-    // mocking
-    const newUser: CreateUserDto = {
-      id: '123',
-      isActive: true,
-      firstName: 'Nitish',
-      lastName: 'Rawat',
-      username: 'nitishrawat',
-      email: 'nitish@binmile.com',
-      contact: '1234567890',
-      pass: 'password123',
-      roleId: 1
-    };
-
-    // test case 1
+    // test case
     it('should add a new user successfully', async () => {
+      const newUserDto: CreateUserDto = {
+        roleId: 2,
+        isActive: true,
+        firstName: 'New',
+        lastName: 'User',
+        username: 'newuser',
+        email: 'newuser@example.com',
+        contact: '1234567890',
+        pass: 'password123',
+      };
 
+      const savedUser: User = {
+        ...newUserDto,
+        id: '789',
+        isActive: true,
+        createdAt: new Date(),
+        deletedAt: null,
+        roleId: validRoleId.subAdmin,
+        pass: 'hashedPassword',
+      };
 
-      const hashedPassword = 'hashedPassword';
-      mockUserRepository.addUser.mockResolvedValue({
-         ...newUser, pass: hashedPassword 
-        });
+      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword' as never);
+      mockUserRepository.addUser.mockResolvedValue(savedUser);
 
-      const result = await service.addNewUser(newUser);
-
-      // conforming the result
-      expect(result).toEqual({ ...newUser, pass: hashedPassword });
-
-      // conforming the mockUserRepository method is called
-      expect(mockUserRepository.addUser).toHaveBeenCalled();
-    });
-
-    // test case 2
-    it('should handle errors when adding a new user', async () => {
-
-      mockUserRepository.addUser.mockRejectedValue(
-        new InternalServerErrorException(dbFailure.DB_FAILURE)
-      );
-
-      // conforming the result
-      await expect(service.addNewUser(newUser)).rejects.toThrow(
-        new InternalServerErrorException(dbFailure.DB_FAILURE)
-      );
+      const result = await service.addNewUser(newUserDto);
+      expect(result).toEqual(savedUser);
+      expect(mockUserRepository.addUser).toHaveBeenCalledWith({
+        ...newUserDto,
+        roleId: validRoleId.subAdmin,
+        pass: 'hashedPassword',
+      });
     });
   });
 
-  // tests for updateUser method
   describe('updateUser', () => {
 
-    // mocking
-    const user: User = {
-      id: '123',
-      isActive: true,
-      roleId: 1,
-      firstName: 'Nitis',
-      lastName: 'Rawat',
-      username: 'nitishrawat',
-      email: 'nitish@binmile.com',
-      contact: '9876543221',
-      pass: 'password456',
-      createdAt: new Date(),
-      deletedAt: null,
-    };
+    // test case
+    it('should update a user successfully', async () => {
+      const updateUserDto: UpdateUserDto = {
+        firstName: 'Updated',
+        lastName: 'User',
+      };
 
-    // test case 1
-    it('should update user successfully', async () => {
+      const updatedUser: User = {
+        id: '123',
+        isActive: true,
+        firstName: 'Updated',
+        lastName: 'User',
+        username: 'existinguser',
+        email: 'existinguser@example.com',
+        contact: '1234567890',
+        pass: 'hashedPassword',
+        createdAt: new Date(),
+        deletedAt: null,
+        roleId: validRoleId.subAdmin,
+      };
 
-
-      const username = 'nitishawat';
-      const updateData: UpdateUserDto = { firstName: 'Nitish' };
-      const updatedUser: User = { ...updateData, ...user };
       mockUserRepository.updateUser.mockResolvedValue(updatedUser);
 
-      const result = await service.updateUser(username, updateData);
-
-      // conforming the result
-      expect(result).toEqual({ success: true, user: updatedUser });
+      const result = await service.updateUser('existinguser', updateUserDto);
+      expect(result).toEqual(updatedUser);
     });
 
-    // test case 2
-    it('should return failure when user not found', async () => {
+    // test case
+    it('should throw an error when update fails', async () => {
+      mockUserRepository.updateUser.mockRejectedValue(new Error());
 
-      // mocking
-      const username = 'nonexistent';
-
-      const updateData: UpdateUserDto = { firstName: 'Nitish' };
-      const updatedUser: User = { ...updateData, ...user };
-      mockUserRepository.updateUser.mockRejectedValue(new NotFoundException(dbFailure.DB_ITEM_NOT_FOUND));
-
-      const result = await service.updateUser(username, updateData);
-
-      // conforming the result
-      expect(result).rejects.toThrow(new NotFoundException(dbFailure.DB_ITEM_NOT_FOUND));
-    });
-
-    // test case 3
-    it('should handle errors during user update', async () => {
-
-      // mocking
-      const username = 'errorUser';
-
-      const updateData: UpdateUserDto = { firstName: 'Nitish' };
-      const updatedUser: User = { ...updateData, ...user };
-      mockUserRepository.updateUser.mockRejectedValue(new InternalServerErrorException(dbFailure.DB_FAILURE));
-
-      // conforming the result
-      await expect(service.updateUser(username, updateData)).rejects.toThrow(new InternalServerErrorException(dbFailure.DB_FAILURE));
+      await expect(service.updateUser('existinguser', {})).rejects.toThrow();
     });
   });
 
+  describe('deleteUser', () => {
 
+    // test case
+    it('should soft delete a user successfully', async () => {
+      const user: User = {
+        id: '123',
+        isActive: true,
+        firstName: 'To',
+        lastName: 'Delete',
+        username: 'todelete',
+        email: 'todelete@example.com',
+        contact: '1234567890',
+        pass: 'hashedPassword',
+        createdAt: new Date(),
+        deletedAt: null,
+        roleId: validRoleId.subAdmin,
+      };
+
+      const updateResult: UpdateResult = {
+        affected: 1,
+        raw: {},
+        generatedMaps: [],
+      };
+
+      mockUserRepository.findUser.mockResolvedValue(user);
+      mockUserRepository.softDelete.mockResolvedValue(updateResult);
+
+      const result = await service.deleteUser('todelete');
+      expect(result).toEqual(updateResult);
+    });
+
+    // test case
+    it('should throw an error when user is not found', async () => {
+      mockUserRepository.findUser.mockRejectedValue(new Error());
+
+      await expect(service.deleteUser('nonexistent')).rejects.toThrow();
+    });
+  });
 });

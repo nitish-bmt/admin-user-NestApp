@@ -1,6 +1,6 @@
 export declare enum StatusCodes {
-    HttpStatus = 0,
     UPDATED = 204,
+    DELETED = 204,
     VALIDATION_ERROR = 1002,
     INTERNAL_SERVER_ERROR = 1003,
     NOT_FOUND = 404,

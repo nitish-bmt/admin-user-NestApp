@@ -51,7 +51,7 @@ let UserService = class UserService {
             throw error;
         }
         if (user.roleId == role_entity_1.validRoleId.admin) {
-            throw new common_1.UnauthorizedException(errors_constant_1.userFailure.ADMIN_PRIVACY);
+            throw new common_1.UnauthorizedException(errors_constant_1.UserError.ADMIN_PRIVACY);
         }
         return user;
     }
@@ -61,14 +61,14 @@ let UserService = class UserService {
             newUserData.pass = await bcrypt.hash(newUserData.pass, Number(process.env.SALT_ROUNDS));
         }
         catch (error) {
-            throw new common_1.InternalServerErrorException(errors_constant_1.errorMessages.ENCRYPTION_FAILURE);
+            throw new common_1.InternalServerErrorException(errors_constant_1.ErrorMessages.ENCRYPTION_ERROR);
         }
         let newUser;
         try {
             newUser = await this.userRepository.addUser(newUserData);
         }
         catch (error) {
-            throw errors_constant_1.dbFailure.DB_WRITE_FAILURE;
+            throw new common_1.BadRequestException(error.message);
         }
         return newUser;
     }
@@ -86,14 +86,13 @@ let UserService = class UserService {
         let user;
         try {
             user = await this.userRepository.findUser(username);
-            console.log(user, "user");
         }
         catch (error) {
             throw error;
         }
         let deletionResult;
         try {
-            deletionResult = (await this.userRepository.softDelete(user));
+            deletionResult = (await this.userRepository.softDelete(user.id));
         }
         catch (error) {
             console.log(error);

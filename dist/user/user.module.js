@@ -32,11 +32,31 @@ exports.UserModule = UserModule;
 exports.UserModule = UserModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, user_repository_1.UserRepository, role_entity_1.Role]),
+            typeorm_1.TypeOrmModule.forFeature([
+                user_entity_1.User,
+                user_repository_1.UserRepository,
+                role_entity_1.Role,
+                role_repository_1.RoleRepository
+            ]),
         ],
-        providers: [user_service_1.UserService, user_repository_1.UserRepository, role_repository_1.RoleRepository, auth_service_1.AuthService, jwt_1.JwtService, jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard],
-        controllers: [user_controller_1.UserController],
-        exports: [typeorm_1.TypeOrmModule, user_service_1.UserService, user_repository_1.UserRepository, role_repository_1.RoleRepository],
+        providers: [
+            user_service_1.UserService,
+            user_repository_1.UserRepository,
+            role_repository_1.RoleRepository,
+            auth_service_1.AuthService,
+            jwt_1.JwtService,
+            jwt_auth_guard_1.JwtAuthGuard,
+            roles_guard_1.RolesGuard
+        ],
+        controllers: [
+            user_controller_1.UserController
+        ],
+        exports: [
+            typeorm_1.TypeOrmModule,
+            user_service_1.UserService,
+            user_repository_1.UserRepository,
+            role_repository_1.RoleRepository
+        ],
     }),
     __metadata("design:paramtypes", [typeorm_2.DataSource])
 ], UserModule);

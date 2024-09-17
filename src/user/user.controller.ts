@@ -1,41 +1,40 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { AdminOnly, Public, UserAndAdmin } from '../utils/customDecorator/custom.decorator';
+import { Public, Roles } from '../utils/customDecorator/custom.decorator';
 import { CreateUserDto, SafeTransferUserDto, UpdateUserDto } from './dto/user.dto';
 import { UserService } from './user.service';
-import { StandardResponse, userEmbeddedRequest } from '../utils/types';
+import { userEmbeddedRequest } from '../utils/types';
 import { User } from './entity/user.entity';
 import { standardizeErrorResponse, standardizeResponse } from '../utils/utilityFunction';
-import { userSuccess } from '../utils/constants/success.constant';
 import { StatusCodes } from '../utils/constants/statusCodes.constant';
 import { UpdateResult } from 'typeorm';
+import { validRoleId, validRoleType } from './entity/role.entity';
+import { UserSuccess } from '../utils/constants/success.constant';
 
 // Controller for handling user-related operations
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)  // Apply JWT authentication and role-based access control to all routes
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // Create a new user (Public access)
-  @Post("register")
   @Public()
-  async addNewUser(@Body() createUserDto: CreateUserDto) {
+  @Post("register")
+  async addNewUser(@Body() userToBeCreated: CreateUserDto) {
+    
     // Attempt to create a new user and handle potential errors
     let response: User;
     try{
-      response = await this.userService.addNewUser(createUserDto);
+      response = await this.userService.addNewUser(userToBeCreated);
     }
     catch(error){
-      return standardizeErrorResponse(error);
+      throw error;
     }
-    return standardizeResponse(HttpStatus.CREATED, userSuccess.USER_CREATED, response);
+    return standardizeResponse(HttpStatus.CREATED, UserSuccess.USER_CREATED, response);
   }
 
   // Get all users (Admin only)
+  @Roles(validRoleId.admin)
   @Get()
-  @AdminOnly()
-  @UseGuards(RolesGuard)
   async getAllUsers() {
     // Retrieve all sub-admin users and convert to safe transfer DTOs
     let users: User[];
@@ -46,15 +45,16 @@ export class UserController {
       result = users.map(user=>this.userService.userEntityToShareableDto(user));
     }
     catch(error){
-      return standardizeErrorResponse(error);
+      throw error;
     }
-    return standardizeResponse(HttpStatus.OK, userSuccess.FETCHED_USER_LIST, result);
+    return standardizeResponse(HttpStatus.OK, UserSuccess.FETCHED_USER_LIST, result);
   }
   
   // Get details of the authenticated user
+  @Roles(validRoleId.admin, validRoleId.subAdmin)
   @Get('details')
-  @UserAndAdmin()
   async getOwnDetials(@Req() req: userEmbeddedRequest) {
+
     // Retrieve and return the authenticated user's details
     let user: User;
     let result: SafeTransferUserDto;
@@ -65,12 +65,12 @@ export class UserController {
     catch(error){
       standardizeErrorResponse(error);
     }
-    return standardizeResponse(HttpStatus.OK, userSuccess.FETCHED_USER, result);
+    return standardizeResponse(HttpStatus.OK, UserSuccess.FETCHED_USER, result);
   }
 
   // Get details of a specific user by username (Admin only)
+  @Roles(validRoleId.admin)
   @Get('details/:username')
-  @AdminOnly()
   async getUser(@Param('username') username: string) {
     // Retrieve and return details of a specific user
     let user: User;
@@ -81,28 +81,12 @@ export class UserController {
       standardizeErrorResponse(error);
     }
     const result: SafeTransferUserDto = this.userService.userEntityToShareableDto(user);
-    return standardizeResponse(HttpStatus.OK, userSuccess.FETCHED_USER, result);
-  }
-  
-  // Deactivate the authenticated user's account
-  @Patch("deactivate")
-  @UserAndAdmin()
-  async deactivateSelf(@Req() req: userEmbeddedRequest){
-    // Deactivate the authenticated user's account
-    let deactivatedUser: User;
-    try{
-      deactivatedUser = await this.userService.updateUser(req.user.username, {isActive: false} as UpdateUserDto);
-    }
-    catch(error){
-      standardizeErrorResponse(error);
-    }
-
-    return standardizeResponse(StatusCodes.UPDATED, userSuccess.DEACTIVATED, deactivatedUser);
+    return standardizeResponse(HttpStatus.OK, UserSuccess.FETCHED_USER, result);
   }
 
   // Deactivate a specific user's account (Admin only)
+  @Roles(validRoleId.admin)
   @Patch("deactivate/:username")
-  @AdminOnly()
   async deactivateUser(@Param('username') username: string){
     // Deactivate a specific user's account
     let deactivatedUser: User;
@@ -110,14 +94,14 @@ export class UserController {
       deactivatedUser = await this.userService.updateUser(username, {isActive: false} as UpdateUserDto)
     }
     catch(error){
-      return standardizeErrorResponse(error);
+      throw error;
     }
-    return standardizeResponse(StatusCodes.UPDATED, userSuccess.DEACTIVATED, deactivatedUser)
+    return standardizeResponse(StatusCodes.UPDATED, UserSuccess.DEACTIVATED, deactivatedUser)
   }
 
   // Activate a specific user's account (Admin only)
+  @Roles(validRoleId.admin)
   @Patch("activate/:username")
-  @AdminOnly()
   async activateUser(@Param('username') username: string){
     // Activate a specific user's account
     let activatedUser: User;
@@ -125,30 +109,16 @@ export class UserController {
       activatedUser = await this.userService.updateUser(username, {isActive: true} as UpdateUserDto)
     }
     catch(error){
-      return standardizeErrorResponse(error);
+      throw error;
     }
 
-    return standardizeResponse(StatusCodes.UPDATED, userSuccess.ACTIVATED, activatedUser);
+    return standardizeResponse(StatusCodes.UPDATED, UserSuccess.ACTIVATED, activatedUser);
   }
 
-  // Delete the authenticated user's account
-  @Delete("delete")
-  @UserAndAdmin()
-  async deleteOwnDetails(@Request() req: userEmbeddedRequest) {
-    // Delete the authenticated user's account
-    let isUserDeleted: UpdateResult;
-    try{
-      isUserDeleted = await this.userService.deleteUser(req.user.userId);
-    }
-    catch(error){
-      return standardizeErrorResponse(error);
-    }
-    return standardizeResponse(StatusCodes.UPDATED, userSuccess.ACTIVATED, isUserDeleted);
-  }
   
   // Delete a specific user's account (Admin only)
+  @Roles(validRoleId.admin)
   @Delete('delete/:username')
-  @AdminOnly()
   async deleteUser(@Param('username') username: string) {
     // Delete a specific user's account
     let isUserDeleted: UpdateResult;
@@ -156,14 +126,29 @@ export class UserController {
       isUserDeleted = await this.userService.deleteUser(username);
     }
     catch(error){
-      return standardizeErrorResponse(error);
+      throw error;
     }
-    return standardizeResponse(StatusCodes.UPDATED, userSuccess.USER_DELETED, isUserDeleted);
+    return standardizeResponse(StatusCodes.UPDATED, UserSuccess.USER_DELETED, isUserDeleted);
   }
 
   // Update a specific user's details (Admin only)
-  @Patch(':username')
-  @AdminOnly()
+  @Roles(validRoleId.admin, validRoleId.subAdmin)
+  @Patch('/update/')
+  async updateOwnDetails(@Req() req: userEmbeddedRequest, @Body() dataToUpdate: UpdateUserDto){
+    // Update a specific user's details
+    let updatedUser: User;
+    try{
+      updatedUser = await this.userService.updateUser(req.user.username, dataToUpdate);
+    }
+    catch(error){
+      throw error;
+    }
+    return standardizeResponse(StatusCodes.UPDATED, UserSuccess.USER_UPDATED, updatedUser);
+  }
+
+  // Update a specific user's details (Admin only)
+  @Roles(validRoleId.admin)
+  @Patch('/update/:username')
   async updateUser(@Param('username') username: string, @Body() updateUserDto: UpdateUserDto) {
     // Update a specific user's details
     let updatedUser: User;
@@ -171,8 +156,8 @@ export class UserController {
       updatedUser = await this.userService.updateUser(username, updateUserDto);
     }
     catch(error){
-      return standardizeErrorResponse(error);
+      throw error;
     }
-    return standardizeResponse(StatusCodes.UPDATED, userSuccess.USER_UPDATED, updatedUser);
+    return standardizeResponse(StatusCodes.UPDATED, UserSuccess.USER_UPDATED, updatedUser);
   }
 }

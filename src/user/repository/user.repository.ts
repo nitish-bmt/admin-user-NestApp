@@ -4,14 +4,14 @@ import { User } from "../entity/user.entity";
 import { Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { CreateUserDto, UpdateUserDto } from "../dto/user.dto";
-import { dbFailure, errorMessages } from "../../utils/constants/errors.constant";
 import { validRoleId } from "../entity/role.entity";
+import { DbError, ErrorMessages, UserError } from "../../utils/constants/errors.constant";
 
 @Injectable()
 export class UserRepository extends Repository<User> {
 
   constructor(
-    // @InjectRepository(User) 
+    @InjectRepository(User) 
     private userRepository: Repository<User>,
   ) {
     super(
@@ -26,19 +26,24 @@ export class UserRepository extends Repository<User> {
     const whereClause: Partial<User> = {};
 
     // Add search conditions based on input
-    if (username) whereClause.username = username;
+    if (username.length > 0) whereClause.username = username;
     else if (email) whereClause.email = email;
-    else throw new BadRequestException(errorMessages.INSUFFICIENT_ARGUMENTS);
+    else throw new BadRequestException(ErrorMessages.INSUFFICIENT_ARGUMENTS);
 
     let user: User;
     try {
       user = await this.userRepository.findOne({ where: whereClause });
       if (!user) 
-        throw new NotFoundException(dbFailure.DB_ITEM_NOT_FOUND);
+        throw new NotFoundException(UserError.USER_NOT_FOUND);
     } 
     catch (error) {
       // Handling database errors
-      throw new InternalServerErrorException(dbFailure.DB_FAILURE);
+      if(error instanceof BadRequestException)
+        throw error;
+      if(error instanceof NotFoundException)
+        throw error;
+
+      throw new InternalServerErrorException(DbError.CONNECTION_ERROR);
     }
 
     return user;
@@ -54,11 +59,11 @@ export class UserRepository extends Repository<User> {
         },
       });
       if (!users) 
-        throw new NotFoundException(dbFailure.DB_ITEM_NOT_FOUND);
+        throw new NotFoundException(UserError.USER_NOT_FOUND);
     } 
     catch (error) {
       // Handling database errors
-      throw new InternalServerErrorException(dbFailure.DB_FAILURE);
+      throw new InternalServerErrorException(UserError.USER_NOT_FOUND);
     }
 
     return users;
@@ -73,8 +78,9 @@ export class UserRepository extends Repository<User> {
     } 
     catch (error) {
       // Handling database errors
-      console.log(error);
-      throw new InternalServerErrorException(dbFailure.DB_WRITE_FAILURE);
+      // console.error(error);
+      // if(error instanceof BadRequestException)  throw BadRequestException
+      throw new InternalServerErrorException(error.message);
     }
 
     return newUser;
@@ -99,7 +105,7 @@ export class UserRepository extends Repository<User> {
       } 
       catch (error) {
         // Handling encryption errors
-        throw new Error(errorMessages.ENCRYPTION_FAILURE);
+        throw new Error(ErrorMessages.ENCRYPTION_ERROR);
       }
     }
 
@@ -112,7 +118,7 @@ export class UserRepository extends Repository<User> {
     } 
     catch (error) {
       // Handling database errors
-      throw new InternalServerErrorException(dbFailure.DB_WRITE_FAILURE);
+      throw new InternalServerErrorException(error.message);
     }
 
     return updatedUser;
