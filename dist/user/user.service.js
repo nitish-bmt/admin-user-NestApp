@@ -58,7 +58,7 @@ let UserService = class UserService {
     async addNewUser(newUserData) {
         newUserData.roleId = newUserData.roleId ? (newUserData.roleId) : (role_entity_1.validRoleId.subAdmin);
         try {
-            newUserData.pass = await bcrypt.hash(newUserData.pass, Number(process.env.SALT_ROUNDS));
+            newUserData.password = await bcrypt.hash(newUserData.password, Number(process.env.SALT_ROUNDS));
         }
         catch (error) {
             throw new common_1.InternalServerErrorException(errors_constant_1.ErrorMessages.ENCRYPTION_ERROR);
@@ -98,6 +98,30 @@ let UserService = class UserService {
             console.log(error);
         }
         return deletionResult;
+    }
+    async authenticateUser(username, password) {
+        let user;
+        try {
+            user = await this.userRepository.findUser(username);
+        }
+        catch (error) {
+            throw error;
+        }
+        try {
+            const isMatching = await bcrypt.compare(password, user.password);
+            if (!isMatching) {
+                throw new common_1.UnauthorizedException(errors_constant_1.AuthError.INVALID_CREDENTIALS);
+            }
+        }
+        catch (error) {
+            if (error instanceof common_1.UnauthorizedException) {
+                throw error;
+            }
+            else {
+                throw new common_1.InternalServerErrorException(errors_constant_1.ErrorMessages.ENCRYPTION_ERROR);
+            }
+        }
+        return user;
     }
 };
 exports.UserService = UserService;

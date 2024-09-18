@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public, Roles } from '../utils/customDecorator/custom.decorator';
 import { LoginUserDto } from 'src/user/dto/user.dto';
@@ -14,6 +14,8 @@ export class AuthController {
   @Post('login')
   async login(@Body() loginCredentials: LoginUserDto) {
     try{
+
+      // throw new BadRequestException("Bad requ -nitish");
       const token: string = await this.authService.login(loginCredentials);
       return standardizeResponse(HttpStatus.ACCEPTED, UserSuccess.LOGGED_IN, token);
     }

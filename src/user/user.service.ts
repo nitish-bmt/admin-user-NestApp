@@ -7,7 +7,7 @@ import { User } from "./entity/user.entity";
 import { plainToClass, plainToInstance } from "class-transformer";
 import { RoleRepository } from "./repository/role.repository";
 import { UpdateResult } from "typeorm";
-import { ErrorMessages, UserError } from "../utils/constants/errors.constant";
+import { AuthError, ErrorMessages, UserError, ValidationErrorMessages } from "../utils/constants/errors.constant";
 
 // User service to handle user-related operations.
 @Injectable()
@@ -71,11 +71,9 @@ export class UserService {
     // Set the default role to sub-admin if not provided.
     newUserData.roleId = newUserData.roleId ? ( newUserData.roleId) : (validRoleId.subAdmin);
 
-    // newUserData = plainToInstance(User, newUserData);
-
     try {
       // Attempt to hash the user's password.
-      newUserData.pass = await bcrypt.hash(newUserData.pass, Number(process.env.SALT_ROUNDS));
+      newUserData.password = await bcrypt.hash(newUserData.password, Number(process.env.SALT_ROUNDS));
     } catch (error) {
       // If an error occurs during hashing, throw an internal server error.
       throw new InternalServerErrorException(ErrorMessages.ENCRYPTION_ERROR);
@@ -135,5 +133,42 @@ export class UserService {
 
     // Return the result of the deletion operation.
     return deletionResult;
+  }
+
+  // FOR AUTH SERVICE
+  // Authenticate a user using their username and password.
+  async authenticateUser(username: string, password: string): Promise<User> {
+    let user: User;
+
+    // Attempt to find the user by their username.
+    try {
+      user = await this.userRepository.findUser(username);
+    } catch (error) {
+      // If the user is not found, re-throw the error.
+      throw error;
+    }
+
+    // Attempt to compare the provided password with the stored password.
+    try {
+      const isMatching: boolean = await bcrypt.compare(password, user.password);
+
+      // If the passwords do not match, throw an unauthorized exception.
+      if (!isMatching) {
+        throw new UnauthorizedException(AuthError.INVALID_CREDENTIALS);
+      }
+    } 
+    catch (error) {
+      // If an error occurs during password comparison, check if it's an unauthorized exception.
+      if (error instanceof UnauthorizedException) {
+        // If it's an unauthorized exception, re-throw it.
+        throw error;
+      } else {
+        // If it's not an unauthorized exception, throw an internal server error.
+        throw new InternalServerErrorException(ErrorMessages.ENCRYPTION_ERROR);
+      }
+    }
+
+    // If authentication is successful, return the user instance.
+    return user;
   }
 }

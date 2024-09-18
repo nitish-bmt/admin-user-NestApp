@@ -36,8 +36,6 @@ import { RoleRepository } from "./repository/role.repository";
   exports: [
     TypeOrmModule, 
     UserService, 
-    UserRepository,   
-    RoleRepository
   ],
 })
 export class UserModule {

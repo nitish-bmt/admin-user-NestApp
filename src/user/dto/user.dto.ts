@@ -1,10 +1,11 @@
 // import { Prop } from "@nestjs/mongoose";
 // import { Exclude, Expose } from "class-transformer";
-import { IS_NOT_EMPTY, IsEmail, IsNotEmpty, IsNumberString, IsOptional, IsPhoneNumber} from "class-validator";
+import { IS_NOT_EMPTY, IsEmail, IsNotEmpty, IsNumberString, IsOptional, IsPhoneNumber, IsString, IsStrongPassword, Length, Matches, MaxLength, MinLength} from "class-validator";
 import { OmitType, PartialType } from "@nestjs/swagger"
 import { validRoleId, validRoleType } from "../entity/role.entity";
 import { Exclude } from "class-transformer";
 import { User } from "../entity/user.entity";
+import { ValidationErrorMessages } from "../../utils/constants/errors.constant";
 
 
 // data transfer object
@@ -26,20 +27,28 @@ export class CreateUserDto{
   username: string;
 
   @IsNotEmpty()
-  pass: string;
+  @IsString()
+  @MinLength(4)
+  @MaxLength(20)
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'password too weak'})
+  password: string;
 
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
-  @IsPhoneNumber('IN')
+  // TODO: mandate formatting(country code is mandatory)
+  @IsOptional()
+  @IsNumberString()
+  @Length(13, 13, {message: ValidationErrorMessages.VALID_PHONE_NUMBER})
+  @Matches(/(^[+91])/, {message: ValidationErrorMessages.COUNTRY_CODE_REQUIRED})
   contact: string;
 }
 
 // to show data
 export class SafeTransferUserDto extends User{
   @Exclude()
-  pass: string;
+  password: string;
 
   @Exclude()
   deletedAt: Date;
@@ -49,7 +58,11 @@ export class SafeTransferUserDto extends User{
 export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @IsOptional()
-  pass?: string;
+  @IsString()
+  @MinLength(4)
+  @MaxLength(20)
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'password too weak'})
+  password?: string;
 
   @IsOptional()
   @Exclude()
@@ -66,5 +79,5 @@ export class LoginUserDto{
   username: string;
 
   @IsNotEmpty()
-  pass: string;
+  password: string;
 }

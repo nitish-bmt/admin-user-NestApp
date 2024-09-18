@@ -83,9 +83,9 @@ let UserRepository = class UserRepository extends typeorm_2.Repository {
         catch (error) {
             throw error;
         }
-        if (updateData.pass) {
+        if (updateData.password) {
             try {
-                updateData.pass = await bcrypt.hash(updateData.pass, Number(process.env.SALT_ROUNDS));
+                updateData.password = await bcrypt.hash(updateData.password, Number(process.env.SALT_ROUNDS));
             }
             catch (error) {
                 throw new Error(errors_constant_1.ErrorMessages.ENCRYPTION_ERROR);

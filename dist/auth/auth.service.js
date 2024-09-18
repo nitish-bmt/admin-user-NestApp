@@ -12,20 +12,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
-const bcrypt = require("bcrypt");
 const user_service_1 = require("../user/user.service");
-const user_repository_1 = require("../user/repository/user.repository");
 const errors_constant_1 = require("../utils/constants/errors.constant");
 let AuthService = class AuthService {
-    constructor(userService, userRepository, jwtService) {
+    constructor(userService, jwtService) {
         this.userService = userService;
-        this.userRepository = userRepository;
         this.jwtService = jwtService;
     }
     async login(loginData) {
         let user;
         try {
-            user = await this.authenticateUser(loginData.username, loginData.pass);
+            user = await this.userService.authenticateUser(loginData.username, loginData.password);
         }
         catch (error) {
             throw error;
@@ -33,42 +30,14 @@ let AuthService = class AuthService {
         if (!user.isActive) {
             throw new common_1.UnauthorizedException(errors_constant_1.AuthError.INACTIVE_USER);
         }
-        if (user.deletedAt !== null) {
-            throw new common_1.UnauthorizedException(errors_constant_1.AuthError.DELETED_USER);
-        }
         const payload = { username: user.username, userId: user.id, roleId: user.roleId };
         return this.jwtService.sign(payload);
-    }
-    async authenticateUser(username, password) {
-        let user;
-        try {
-            user = await this.userRepository.findUser(username);
-        }
-        catch (error) {
-            throw error;
-        }
-        try {
-            const isMatching = await bcrypt.compare(password, user.pass);
-            if (!isMatching) {
-                throw new common_1.UnauthorizedException(errors_constant_1.AuthError.INVALID_CREDENTIALS);
-            }
-        }
-        catch (error) {
-            if (error instanceof common_1.UnauthorizedException) {
-                throw error;
-            }
-            else {
-                throw new common_1.InternalServerErrorException(errors_constant_1.ErrorMessages.ENCRYPTION_ERROR);
-            }
-        }
-        return user;
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [user_service_1.UserService,
-        user_repository_1.UserRepository,
         jwt_1.JwtService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

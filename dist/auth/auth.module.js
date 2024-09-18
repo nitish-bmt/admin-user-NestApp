@@ -16,6 +16,7 @@ const jwt_strategy_1 = require("./jwt.strategy");
 const user_module_1 = require("../user/user.module");
 const roles_guard_1 = require("./roles.guard");
 const jwt_auth_guard_1 = require("./jwt-auth.guard");
+const user_service_1 = require("../user/user.service");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -35,6 +36,7 @@ exports.AuthModule = AuthModule = __decorate([
         ],
         providers: [
             auth_service_1.AuthService,
+            user_service_1.UserService,
             jwt_strategy_1.JwtStrategy,
             jwt_auth_guard_1.JwtAuthGuard,
             roles_guard_1.RolesGuard

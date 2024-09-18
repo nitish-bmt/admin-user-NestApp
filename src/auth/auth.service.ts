@@ -13,24 +13,18 @@ import { AuthError, ErrorMessages } from '../utils/constants/errors.constant';
 export class AuthService {
 
   // Constructor to inject dependencies.
-  // @param userService User service instance.
-  // @param userRepository User repository instance.
-  // @param jwtService JWT service instance.
   constructor(
     private userService: UserService,
-    private userRepository: UserRepository,
     private jwtService: JwtService,
   ) {}
 
   // Generate a JWT token for an authenticated user.
-  // @param loginData Login data containing username and password.
-  // @returns A JWT token string.
   async login(loginData: LoginUserDto): Promise<string> {
     let user: User;
 
     // Attempt to authenticate the user using the provided login data.
     try {
-      user = await this.authenticateUser(loginData.username, loginData.pass);
+      user = await this.userService.authenticateUser(loginData.username, loginData.password);
     }
     catch (error) {
       // If authentication fails, re-throw the error.
@@ -42,9 +36,6 @@ export class AuthService {
       // If the user is not active, throw an unauthorized exception.
       throw new UnauthorizedException(AuthError.INACTIVE_USER);
     }
-    if(user.deletedAt !== null){
-      throw new UnauthorizedException(AuthError.DELETED_USER);
-    }
 
     // Create a JWT payload containing the user's details.
     const payload: JwtPayload = { username: user.username, userId: user.id, roleId: user.roleId };
@@ -52,43 +43,4 @@ export class AuthService {
     // Generate and return a JWT token.
     return this.jwtService.sign(payload);
   }
-
-  // Authenticate a user using their username and password.
-  // @param username Username to authenticate.
-  // @param password Password to authenticate.
-  // @returns The authenticated user instance.
-  async authenticateUser(username: string, password: string): Promise<User> {
-    let user: User;
-
-    // Attempt to find the user by their username.
-    try {
-      user = await this.userRepository.findUser(username);
-    } catch (error) {
-      // If the user is not found, re-throw the error.
-      throw error;
-    }
-
-    // Attempt to compare the provided password with the stored password.
-    try {
-      const isMatching: boolean = await bcrypt.compare(password, user.pass);
-
-      // If the passwords do not match, throw an unauthorized exception.
-      if (!isMatching) {
-        throw new UnauthorizedException(AuthError.INVALID_CREDENTIALS);
-      }
-    } 
-    catch (error) {
-      // If an error occurs during password comparison, check if it's an unauthorized exception.
-      if (error instanceof UnauthorizedException) {
-        // If it's an unauthorized exception, re-throw it.
-        throw error;
-      } else {
-        // If it's not an unauthorized exception, throw an internal server error.
-        throw new InternalServerErrorException(ErrorMessages.ENCRYPTION_ERROR);
-      }
-    }
-
-    // If authentication is successful, return the user instance.
-    return user;
-  }
-}
+} 

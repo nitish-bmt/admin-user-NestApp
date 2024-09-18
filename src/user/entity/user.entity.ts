@@ -45,7 +45,7 @@ export class User{
   @Column({
     nullable: false,
   })
-  pass: string;
+  password: string;
 
   @Column({
     unique: true,
@@ -53,7 +53,10 @@ export class User{
   })
   email: string;
 
-  @Column()
+  @Column({
+    length: 13,
+    nullable: true,
+  })
   contact: string;
 
   @CreateDateColumn()

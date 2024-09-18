@@ -54,8 +54,6 @@ exports.UserModule = UserModule = __decorate([
         exports: [
             typeorm_1.TypeOrmModule,
             user_service_1.UserService,
-            user_repository_1.UserRepository,
-            role_repository_1.RoleRepository
         ],
     }),
     __metadata("design:paramtypes", [typeorm_2.DataSource])

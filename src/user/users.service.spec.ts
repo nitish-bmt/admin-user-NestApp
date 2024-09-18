@@ -63,7 +63,7 @@ describe('UserService', () => {
           username: 'nitish',
           email: 'nitish@example.com',
           contact: '1234567890',
-          pass: 'abc',
+          password: 'abc',
           createdAt: new Date(),
           deletedAt: null,
           roleId: validRoleId.subAdmin,
@@ -98,7 +98,7 @@ describe('UserService', () => {
         username: 'abhishek',
         email: 'abhishek@example.com',
         contact: '1234567890',
-        pass: 'xyz',
+        password: 'xyz',
         createdAt: new Date(),
         deletedAt: null,
         roleId: validRoleId.admin,
@@ -131,7 +131,7 @@ describe('UserService', () => {
         username: 'subadmin',
         email: 'subadmin@example.com',
         contact: '1234567890',
-        pass: 'xyz',
+        password: 'xyz',
         createdAt: new Date(),
         deletedAt: null,
         roleId: validRoleId.subAdmin,
@@ -153,7 +153,7 @@ describe('UserService', () => {
         username: 'admin',
         email: 'admin@example.com',
         contact: '1234567890',
-        pass: 'xyz',
+        password: 'xyz',
         createdAt: new Date(),
         deletedAt: null,
         roleId: validRoleId.admin,
@@ -178,7 +178,7 @@ describe('UserService', () => {
         username: 'newuser',
         email: 'newuser@example.com',
         contact: '1234567890',
-        pass: 'password123',
+        password: 'password123',
       };
 
       const savedUser: User = {
@@ -188,7 +188,7 @@ describe('UserService', () => {
         createdAt: new Date(),
         deletedAt: null,
         roleId: validRoleId.subAdmin,
-        pass: 'hashedPassword',
+        password: 'hashedPassword',
       };
 
       jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword' as never);
@@ -225,7 +225,7 @@ describe('UserService', () => {
         username: 'existinguser',
         email: 'existinguser@example.com',
         contact: '1234567890',
-        pass: 'hashedPassword',
+        password: 'hashedPassword',
         createdAt: new Date(),
         deletedAt: null,
         roleId: validRoleId.subAdmin,
@@ -262,7 +262,7 @@ describe('UserService', () => {
         username: 'todelete',
         email: 'todelete@example.com',
         contact: '1234567890',
-        pass: 'hashedPassword',
+        password: 'hashedPassword',
         createdAt: new Date(),
         deletedAt: null,
         roleId: validRoleId.subAdmin,

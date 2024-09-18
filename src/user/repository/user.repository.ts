@@ -99,9 +99,9 @@ export class UserRepository extends Repository<User> {
     }
 
     // Hash password if it needs to be updated
-    if (updateData.pass) {
+    if (updateData.password) {
       try {
-        updateData.pass = await bcrypt.hash(updateData.pass, Number(process.env.SALT_ROUNDS));
+        updateData.password = await bcrypt.hash(updateData.password, Number(process.env.SALT_ROUNDS));
       } 
       catch (error) {
         // Handling encryption errors

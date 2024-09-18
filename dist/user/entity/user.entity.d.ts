@@ -5,7 +5,7 @@ export declare class User {
     firstName: string;
     lastName: string;
     username: string;
-    pass: string;
+    password: string;
     email: string;
     contact: string;
     createdAt: Date;

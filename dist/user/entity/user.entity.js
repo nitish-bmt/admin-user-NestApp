@@ -61,7 +61,7 @@ __decorate([
         nullable: false,
     }),
     __metadata("design:type", String)
-], User.prototype, "pass", void 0);
+], User.prototype, "password", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         unique: true,
@@ -70,7 +70,10 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({
+        length: 13,
+        nullable: true,
+    }),
     __metadata("design:type", String)
 ], User.prototype, "contact", void 0);
 __decorate([
